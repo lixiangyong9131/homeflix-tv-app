@@ -5,7 +5,7 @@ import com.homeflix.tv.presentation.ui.TileKind
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** Home's "Coming Soon: Movies" / "Coming Soon: Series" rows (hidden when empty or unreachable). */
+/** Home's "即将上线：电影" / "即将上线：剧集" rows (hidden when empty or unreachable). */
 @Singleton
 class ComingSoonHome @Inject constructor(private val repo: ComingSoonRepository) {
 

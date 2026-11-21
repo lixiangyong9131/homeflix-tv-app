@@ -16,7 +16,7 @@ data class ComingSoonItem(
     val tagline: String? = null,
     /** YYYY-MM-DD */
     @SerializedName("release_date") val releaseDate: String? = null,
-    /** tv: "New Series" or "Season 3" */
+    /** tv: "新剧集" or "第三季" */
     @SerializedName("release_label") val releaseLabel: String? = null,
     val season: Int = 0,
     @SerializedName("days_until") val daysUntil: Int = 0,

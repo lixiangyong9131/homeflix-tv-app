@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-/** Whether to offer "Coming Soon" in the profile menu (the server has upcoming titles). */
+/** Whether to offer "即将上线" in the profile menu (the server has upcoming titles). */
 @HiltViewModel
 class ComingSoonEntryViewModel @Inject constructor(repo: ComingSoonRepository) : ViewModel() {
     private val _available = MutableStateFlow(false)

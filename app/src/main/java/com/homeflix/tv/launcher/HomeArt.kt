@@ -24,7 +24,7 @@ import java.security.MessageDigest
 
 /**
  * Draws the 16:9 cards shown on the TV home screen: the title's backdrop with
- * its logo (or name), a small label like "Continue Watching" and a red
+ * its logo (or name), a small label like "继续观看" and a red
  * progress bar — the look Netflix and Prime use there.
  *
  * Cards are saved in the app's files and handed to the launcher as
@@ -105,7 +105,7 @@ class HomeArt(private val context: Context) {
         }
 
         if (card.progress != null) {
-            // "Continue Watching" over a red progress bar, like Netflix.
+            // "继续观看" over a red progress bar, like Netflix.
             card.label?.let { label ->
                 p.color = Color.WHITE
                 p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
@@ -119,7 +119,7 @@ class HomeArt(private val context: Context) {
             p.color = Color.rgb(229, 9, 20)
             c.drawRect(0f, H - 8f, W * card.progress.coerceIn(0.03f, 1f), H.toFloat(), p)
         } else card.label?.let { label ->
-            // Badge in the top-right corner ("NEW", "NEW EPISODE").
+            // Badge in the top-right corner ("新", "NEW EPISODE").
             p.typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             p.textSize = 20f
             val text = label.uppercase()

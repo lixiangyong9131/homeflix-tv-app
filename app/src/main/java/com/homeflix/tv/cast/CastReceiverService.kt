@@ -55,7 +55,7 @@ class CastReceiverService : Service() {
         val nm = getSystemService(NotificationManager::class.java)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             nm?.createNotificationChannel(
-                NotificationChannel(CHANNEL, "Ready to cast", NotificationManager.IMPORTANCE_MIN).apply {
+                NotificationChannel(CHANNEL, "可以投屏", NotificationManager.IMPORTANCE_MIN).apply {
                     setShowBadge(false)
                 }
             )

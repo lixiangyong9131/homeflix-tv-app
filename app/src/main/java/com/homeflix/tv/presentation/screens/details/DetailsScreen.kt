@@ -53,7 +53,7 @@ import com.homeflix.tv.presentation.ui.rememberFocusRegistry
 import com.homeflix.tv.util.ApiUtils
 import kotlinx.coroutines.launch
 
-/** Movie title page: billboard header with trailer + "More Like This". Back returns to the exact tile. */
+/** Movie title page: billboard header with trailer + "更多类似". Back returns to the exact tile. */
 @UnstableApi
 @Composable
 fun DetailsScreen(
@@ -77,7 +77,7 @@ fun DetailsScreen(
             when {
                 media != null -> DetailsContent(media, state, navigator, onMyList = vm::toggleMyList, onRate = vm::rate)
                 state.loading -> LoadingState()
-                else -> ErrorState(state.error ?: "Couldn't load this title.", onRetry = { vm.load(mediaId) })
+                else -> ErrorState(state.error ?: "无法加载该影片", onRetry = { vm.load(mediaId) })
             }
         }
     }
@@ -128,19 +128,19 @@ private fun DetailsContent(media: Media, state: DetailsState, navigator: AppNavi
                     peek = 0.dp,
                     cinematic = true,
                     onImmersive = { immersive = it },
-                    belowHint = if (state.similar != null) "More Like This" else null,
+                    belowHint = if (state.similar != null) "更多类似" else null,
                     modifier = Modifier.onFocusChanged {
                         if (it.hasFocus) { section = 0; scope.launch { listState.glideTo(0) } }
                     }
                 ) {
                     val resume = state.resumeMs > 0
-                    PillButton(if (resume) "Resume" else "Play", { navigator.player(media.id, state.resumeMs) },
+                    PillButton(if (resume) "继续播放" else "播放", { navigator.player(media.id, state.resumeMs) },
                         icon = Icons.Filled.PlayArrow, focusRequester = play)
                     if (resume) {
-                        PillButton("Play from beginning", { navigator.player(media.id, 0, fromStart = true) }, icon = Icons.Filled.Replay)
+                        PillButton("从头播放", { navigator.player(media.id, 0, fromStart = true) }, icon = Icons.Filled.Replay)
                     }
                     state.inMyList?.let { inList ->
-                        PillButton(if (inList) "In My List" else "My List", onMyList,
+                        PillButton(if (inList) "已收藏" else "我的片单", onMyList,
                             icon = if (inList) Icons.Filled.Check else Icons.Filled.Add)
                     }
                     com.homeflix.tv.presentation.ui.RateButton(state.rating, onRate)

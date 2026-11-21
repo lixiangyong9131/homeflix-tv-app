@@ -52,7 +52,7 @@ fun FeedPage(
     onRetry: () -> Unit,
     onResumed: () -> Unit,
     onOpenSettings: (() -> Unit)? = null,
-    heroPlayLabel: (Tile) -> String = { "Play" }
+    heroPlayLabel: (Tile) -> String = { "播放" }
 ) {
     val listState = rememberLazyListState()
     val registry = rememberFocusRegistry()
@@ -117,7 +117,7 @@ fun FeedPage(
                 heroPlayLabel = heroPlayLabel
             )
             state.loading -> LoadingState()
-            else -> ErrorState(state.error ?: "Nothing to show", onRetry, onSettings = onOpenSettings)
+            else -> ErrorState(state.error ?: "暂无内容", onRetry, onSettings = onOpenSettings)
         }
     }
 }
@@ -138,8 +138,8 @@ fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifi
             Text(message, color = Tv.TextPrimary, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
             androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(12.dp),
                 modifier = Modifier.padding(top = 4.dp)) {
-                PillButton("Try Again", onRetry, icon = Icons.Filled.Refresh, focusRequester = retry)
-                if (onSettings != null) PillButton("Server settings", onSettings, icon = Icons.Filled.Settings)
+                PillButton("重试", onRetry, icon = Icons.Filled.Refresh, focusRequester = retry)
+                if (onSettings != null) PillButton("服务器设置", onSettings, icon = Icons.Filled.Settings)
             }
         }
     }

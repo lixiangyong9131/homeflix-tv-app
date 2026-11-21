@@ -72,7 +72,7 @@ class CastController @Inject constructor(
     val playRequests: StateFlow<CastPlayRequest?> = _playRequests.asStateFlow()
 
     private val _notice = MutableStateFlow<String?>(null)
-    /** "Casting from Chrome on Mac" — shown briefly by the player. */
+    /** "正在从 Mac 版 Chrome 投屏" — shown briefly by the player. */
     val notice: StateFlow<String?> = _notice.asStateFlow()
 
     private var lastStatus: CastStatus = CastStatus.Idle

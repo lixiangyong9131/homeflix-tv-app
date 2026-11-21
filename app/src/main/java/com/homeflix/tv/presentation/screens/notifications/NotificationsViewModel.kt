@@ -45,7 +45,7 @@ class NotificationsViewModel @Inject constructor(
                     .sortedByDescending { it.timestampSeconds }
                 _uiState.value = NotificationsUiState.Success(items)
             } catch (e: Exception) {
-                _uiState.value = NotificationsUiState.Error(e.message ?: "Failed to load notifications")
+                _uiState.value = NotificationsUiState.Error(e.message ?: "加载通知失败")
             }
         }
     }

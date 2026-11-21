@@ -50,7 +50,7 @@ import androidx.compose.ui.window.DialogProperties
 import com.homeflix.tv.data.repository.Thumbs
 
 /**
- * "Rate" on a title page, Netflix-style: shows your current rating; OK opens
+ * "评分" on a title page, Netflix-style: shows your current rating; OK opens
  * Not for me / I like this / Love this!. Ratings personalise your rows.
  * [rating] null = still loading (button hidden).
  */
@@ -59,10 +59,10 @@ fun RateButton(rating: Int?, onRate: (Int) -> Unit) {
     if (rating == null) return
     var open by remember { mutableStateOf(false) }
     val label = when (rating) {
-        Thumbs.LOVE -> "Loved"
-        Thumbs.LIKE -> "Liked"
-        Thumbs.DISLIKE -> "Not for me"
-        else -> "Rate"
+        Thumbs.LOVE -> "喜欢"
+        Thumbs.LIKE -> "已喜欢"
+        Thumbs.DISLIKE -> "不感兴趣"
+        else -> "评分"
     }
     val icon = when (rating) {
         Thumbs.DISLIKE -> Icons.Filled.ThumbDown
@@ -96,10 +96,10 @@ private fun RateDialog(current: Int, onPick: (Int) -> Unit, onDismiss: () -> Uni
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                Text("Rate this title", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                Text("Your ratings shape what HomeFlix recommends", color = Tv.TextSecondary, fontSize = 13.sp)
+                Text("为该影片评分", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text("你的评分会影响推荐内容", color = Tv.TextSecondary, fontSize = 13.sp)
                 // However focus first enters the dialog, it lands on the current
-                // rating (or "I like this"), never just on the first button.
+                // rating (or "我喜欢"), never just on the first button.
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(26.dp),
                     modifier = Modifier.padding(top = 18.dp)
@@ -107,14 +107,14 @@ private fun RateDialog(current: Int, onPick: (Int) -> Unit, onDismiss: () -> Uni
                         .focusGroup()
                 ) {
                     val initial = when (current) { Thumbs.DISLIKE -> 0; Thumbs.LOVE -> 2; else -> 1 }
-                    ThumbOption("Not for me", Thumbs.DISLIKE, current, onPick, if (initial == 0) first else null) { tint, size ->
+                    ThumbOption("不感兴趣", Thumbs.DISLIKE, current, onPick, if (initial == 0) first else null) { tint, size ->
                         Icon(if (current == Thumbs.DISLIKE) Icons.Filled.ThumbDown else Icons.Outlined.ThumbDown, null, tint = tint, modifier = Modifier.size(size))
                     }
-                    ThumbOption("I like this", Thumbs.LIKE, current, onPick, if (initial == 1) first else null) { tint, size ->
+                    ThumbOption("我喜欢", Thumbs.LIKE, current, onPick, if (initial == 1) first else null) { tint, size ->
                         Icon(if (current == Thumbs.LIKE) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp, null, tint = tint, modifier = Modifier.size(size))
                     }
-                    ThumbOption("Love this!", Thumbs.LOVE, current, onPick, if (initial == 2) first else null) { tint, size ->
-                        // Two thumbs, like Netflix's "Love this!".
+                    ThumbOption("非常喜欢", Thumbs.LOVE, current, onPick, if (initial == 2) first else null) { tint, size ->
+                        // Two thumbs, like Netflix's "非常喜欢".
                         Box(Modifier.size(size + 12.dp)) {
                             val i = if (current == Thumbs.LOVE) Icons.Filled.ThumbUp else Icons.Outlined.ThumbUp
                             Icon(i, null, tint = tint.copy(alpha = 0.55f), modifier = Modifier.size(size).align(Alignment.TopStart))

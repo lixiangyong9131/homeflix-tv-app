@@ -124,7 +124,7 @@ fun ComingSoonContent(state: ComingSoonState, c: ComingSoonController, onExit: (
             }
         }
         if (state.paused) {
-            Icon(Icons.Filled.Pause, "Paused", tint = Color.White,
+            Icon(Icons.Filled.Pause, "已暂停", tint = Color.White,
                 modifier = Modifier.align(Alignment.Center).size(64.dp).clip(RoundedCornerShape(50)).background(Color(0x99000000)).padding(12.dp))
         }
         AnimatedVisibility(
@@ -152,7 +152,7 @@ private fun Overlay(state: ComingSoonState, item: ComingSoonItem) {
             Icon(com.homeflix.tv.presentation.ui.HomeFlixMark, null, tint = Color.White, modifier = Modifier.size(14.dp, 16.dp))
             Text("  COMING SOON", color = Color.White, fontSize = 13.sp, fontWeight = FontWeight.Bold, letterSpacing = 2.sp)
             if (item.rank > 0) {
-                Text("   ·   #${item.rank} in ${if (item.isSeries) "Series" else "Movies"}", color = Tv.TextSecondary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                Text("   ·   #${item.rank} in ${if (item.isSeries) "Series" else "电影"}", color = Tv.TextSecondary, fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
             }
             androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
             val next = state.items.getOrNull((state.index + 1) % state.items.size.coerceAtLeast(1))
@@ -209,7 +209,7 @@ private fun Overlay(state: ComingSoonState, item: ComingSoonItem) {
                 item.notify?.status?.takeIf { on && it.isNotBlank() }?.let {
                     Text(it.replaceFirstChar { c -> c.uppercase() }, color = Tv.TextMuted, fontSize = 12.sp)
                 }
-                CsButton(if (state.details) "Less" else "Details", Icons.Filled.Info, focused = state.zone == CsZone.DETAILS)
+                CsButton(if (state.details) "Less" else "详情", Icons.Filled.Info, focused = state.zone == CsZone.DETAILS)
                 androidx.compose.foundation.layout.Spacer(Modifier.weight(1f))
                 Text("◀ ▶  browse    ▲ ▼  buttons / titles", color = Tv.TextMuted, fontSize = 12.sp)
             }

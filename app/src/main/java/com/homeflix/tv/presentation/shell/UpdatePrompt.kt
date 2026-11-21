@@ -44,7 +44,7 @@ import com.homeflix.tv.update.UpdateState
 
 /**
  * "HomeFlix 5.2 is ready" — shown over the browse screens (never over the
- * player) once an update has been downloaded and verified. "Later" hides it
+ * player) once an update has been downloaded and verified. "稍后" hides it
  * until the next launch.
  */
 @Composable
@@ -53,7 +53,7 @@ fun UpdatePrompt(updater: AppUpdater) {
     var dismissedVersion by rememberSaveable { mutableLongStateOf(-1L) }
     var needsPermission by remember { mutableStateOf(false) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        // Back from the "Install unknown apps" screen: if allowed now, carry on.
+        // Back from the "安装未知应用" screen: if allowed now, carry on.
         if (needsPermission && updater.canInstall()) { needsPermission = false; updater.install() }
     }
 
@@ -78,7 +78,7 @@ fun UpdatePrompt(updater: AppUpdater) {
             Modifier.width(560.dp).clip(RoundedCornerShape(12.dp)).background(Tv.Surface).padding(36.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Text("Update available", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
+            Text("有可用更新", color = Color.White, fontSize = 28.sp, fontWeight = FontWeight.Bold)
             Text(
                 "HomeFlix ${info.versionName ?: info.versionCode.toString()} is ready to install " +
                     "(you have ${BuildConfig.VERSION_NAME}). It takes a few seconds and keeps your settings and progress.",
@@ -96,7 +96,7 @@ fun UpdatePrompt(updater: AppUpdater) {
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.padding(top = 10.dp)) {
                 PillButton(
-                    text = if (installing) "Installing…" else "Update now",
+                    text = if (installing) "Installing…" else "立即更新",
                     onClick = {
                         if (installing) return@PillButton
                         needsPermission = !updater.canInstall()
@@ -105,7 +105,7 @@ fun UpdatePrompt(updater: AppUpdater) {
                     icon = Icons.Filled.SystemUpdate,
                     focusRequester = focus
                 )
-                PillButton("Later", { dismissedVersion = info.versionCode })
+                PillButton("稍后", { dismissedVersion = info.versionCode })
             }
         }
     }

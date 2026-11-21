@@ -47,8 +47,8 @@ fun CrashNotice() {
             Modifier.width(760.dp).clip(RoundedCornerShape(12.dp)).background(Tv.Surface).padding(28.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text("HomeFlix closed unexpectedly last time", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-            Text("A photo of this screen helps fix it.", color = Tv.TextSecondary, fontSize = 14.sp)
+            Text("上次异常退出", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("截图有助于修复问题", color = Tv.TextSecondary, fontSize = 14.sp)
             Text(CrashReporter.summary(r), color = Color(0xFFDDDDDD), fontSize = 11.sp, lineHeight = 14.sp,
                 fontFamily = FontFamily.Monospace)
             PillButton("OK", dismiss, focusRequester = ok, modifier = Modifier.padding(top = 6.dp))

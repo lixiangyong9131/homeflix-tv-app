@@ -95,7 +95,7 @@ fun TvSeriesDetailsScreen(
             when {
                 series != null -> SeriesContent(series, state, navigator, onSeason = vm::selectSeason, onMyList = vm::toggleMyList, onRate = vm::rate)
                 state.loading -> LoadingState()
-                else -> ErrorState(state.error ?: "Couldn't load this show.", onRetry = { vm.load(seriesId) })
+                else -> ErrorState(state.error ?: "无法加载该剧集", onRetry = { vm.load(seriesId) })
             }
         }
     }
@@ -162,11 +162,11 @@ private fun SeriesContent(series: TvSeries, state: SeriesState, navigator: AppNa
                             PillButton("Play from S1:E1", { navigator.player(first, 0, fromStart = true) }, icon = Icons.Filled.Replay)
                         }
                     } else {
-                        PillButton("Play", { state.firstEpisodeId?.let { navigator.player(it, 0) } },
+                        PillButton("播放", { state.firstEpisodeId?.let { navigator.player(it, 0) } },
                             icon = Icons.Filled.PlayArrow, focusRequester = play)
                     }
                     state.inMyList?.let { inList ->
-                        PillButton(if (inList) "In My List" else "My List", onMyList,
+                        PillButton(if (inList) "已收藏" else "我的片单", onMyList,
                             icon = if (inList) Icons.Filled.Check else Icons.Filled.Add)
                     }
                     com.homeflix.tv.presentation.ui.RateButton(state.rating, onRate)

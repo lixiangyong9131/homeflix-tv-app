@@ -14,7 +14,7 @@ data class HomeCard(
     val description: String?,
     val imageUrl: String,
     val logoUrl: String?,
-    /** Small label on the card: "Continue Watching", "New", "New Episode"… */
+    /** Small label on the card: "继续观看", "New", "New Episode"… */
     val label: String?,
     val progress: Float?,
     val resumeMs: Long,
@@ -46,7 +46,7 @@ object HomeCards {
         fun add(t: Tile, card: HomeCard) { if (out.size < MAX_CARDS && seen.add(identity(t))) out += card }
 
         rows["continue"]?.tiles.orEmpty().filter { it.progress != null }.take(MAX_CONTINUE).forEach { t ->
-            add(t, card(t, label = "Continue Watching", continueWatching = true))
+            add(t, card(t, label = "继续观看", continueWatching = true))
         }
         // Then interleave new arrivals and recommendations so the row feels fresh.
         val sources = listOf(

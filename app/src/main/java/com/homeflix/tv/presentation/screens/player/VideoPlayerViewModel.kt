@@ -142,7 +142,7 @@ class VideoPlayerViewModel @Inject constructor(
 
     val player: ExoPlayer = buildPlayer()
 
-    /** "Casting from Chrome on Mac" notice for the player UI. */
+    /** "正在从 Mac 版 Chrome 投屏" notice for the player UI. */
     val castNotice = castController.notice
 
     private val sessionId = UUID.randomUUID().toString().replace("-", "").take(16)
@@ -354,7 +354,7 @@ class VideoPlayerViewModel @Inject constructor(
                     streamUrl = url; isHls = true
                     startPlayback(position, playWhenReady = true)
                 } else {
-                    _ui.update { it.copy(phase = PlayerPhase.Error("This video format isn't supported on this TV.")) }
+                    _ui.update { it.copy(phase = PlayerPhase.Error("本电视不支持该视频格式")) }
                 }
             }
             return
@@ -372,7 +372,7 @@ class VideoPlayerViewModel @Inject constructor(
         _ui.update {
             it.copy(phase = PlayerPhase.Error(
                 if (isIo) "Can't reach your HomeFlix server. Check the network and try again."
-                else "Something went wrong while playing this title."
+                else "播放时出错"
             ))
         }
         reportCast()
@@ -674,7 +674,7 @@ data class PlayerUiState(
                 audio != null && sub != null -> "$audio with $sub Subtitles"
                 audio != null -> audio
                 sub != null -> "$sub Subtitles"
-                else -> "Audio & Subtitles"
+                else -> "音轨与字幕"
             }
         }
 }

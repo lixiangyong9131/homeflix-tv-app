@@ -63,7 +63,7 @@ fun AboutScreen(navigator: com.homeflix.tv.presentation.navigation.AppNavigator?
     ) {
         Column(Modifier.align(Alignment.CenterStart).padding(start = 96.dp).width(560.dp)) {
             com.homeflix.tv.presentation.ui.BrandWordmark(fontSize = 44.sp, markSize = 34.dp)
-            Text("Your movies and shows, on your own server.", color = Tv.TextSecondary, fontSize = 15.sp,
+            Text("你的影视库，尽在自己的服务器上", color = Tv.TextSecondary, fontSize = 15.sp,
                 modifier = Modifier.padding(top = 4.dp))
             Spacer(Modifier.height(30.dp))
 
@@ -80,9 +80,9 @@ fun AboutScreen(navigator: com.homeflix.tv.presentation.navigation.AppNavigator?
             }
             Spacer(Modifier.height(22.dp))
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                InfoLine(Icons.Filled.Email, "Contact", Credits.EMAIL)
-                InfoLine(Icons.Filled.Person, "GitHub", Credits.GITHUB)
-                InfoLine(Icons.Filled.Code, "Open source", Credits.REPOS.joinToString("   ·   "))
+                InfoLine(Icons.Filled.Email, "联系", Credits.EMAIL)
+                InfoLine(Icons.Filled.Person, "开源地址", Credits.GITHUB)
+                InfoLine(Icons.Filled.Code, "开源", Credits.REPOS.joinToString("   ·   "))
             }
             // Donation: a TV can't open a browser, so show the address big enough to type on a phone.
             Row(
@@ -92,7 +92,7 @@ fun AboutScreen(navigator: com.homeflix.tv.presentation.navigation.AppNavigator?
             ) {
                 Icon(Icons.Filled.Coffee, null, tint = Color.Black, modifier = Modifier.size(22.dp))
                 Column(Modifier.padding(start = 12.dp)) {
-                    Text("Enjoying HomeFlix? Buy me a coffee", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
+                    Text("喜欢 HomeFlix？请我喝杯咖啡", color = Color.Black, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                     Text(Credits.DONATE, color = Color.Black, fontSize = 17.sp, fontWeight = FontWeight.SemiBold)
                 }
             }
@@ -100,7 +100,7 @@ fun AboutScreen(navigator: com.homeflix.tv.presentation.navigation.AppNavigator?
             Text("HomeFlix TV ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})", color = Tv.TextMuted, fontSize = 13.sp)
             Text("© ${Credits.DEVELOPER}. Thanks for using and contributing to HomeFlix.", color = Tv.TextMuted, fontSize = 13.sp,
                 modifier = Modifier.padding(top = 2.dp))
-            PillButton("Back", { back?.onBackPressed() }, icon = Icons.AutoMirrored.Filled.ArrowBack, focusRequester = focus,
+            PillButton("返回", { back?.onBackPressed() }, icon = Icons.AutoMirrored.Filled.ArrowBack, focusRequester = focus,
                 modifier = Modifier.padding(top = 24.dp))
         }
     navigator?.let { com.homeflix.tv.presentation.shell.SubPageTopBar(it) }

@@ -135,8 +135,8 @@ private fun posterWidth(h: Dp): Dp = h * (2f / 3f)
 private fun landscapeWidth(h: Dp): Dp = h * (16f / 9f)
 
 /**
- * A Coming Soon title: backdrop card with the date line, a "Season 3" /
- * "New Series" chip and a bell when Notify Me is on. Resting on it ~700 ms
+ * A Coming Soon title: backdrop card with the date line, a "第三季" /
+ * "新剧集" chip and a bell when Notify Me is on. Resting on it ~700 ms
  * plays its trailer muted inside the card (the shared preview player).
  */
 @UnstableApi
@@ -184,7 +184,7 @@ fun ComingSoonTile(tile: Tile, focusKey: String, registry: FocusRegistry, onFocu
                     .background(Color.White).padding(horizontal = 5.dp, vertical = 1.dp))
         }
         if (tile.bell) {
-            Icon(androidx.compose.material.icons.Icons.Filled.NotificationsActive, "Notify Me is on", tint = Color.White,
+            Icon(androidx.compose.material.icons.Icons.Filled.NotificationsActive, "已开启提醒", tint = Color.White,
                 modifier = Modifier.align(Alignment.TopEnd).padding(7.dp).size(20.dp)
                     .clip(androidx.compose.foundation.shape.CircleShape).background(Color(0x99000000)).padding(3.dp))
         }
@@ -194,7 +194,7 @@ fun ComingSoonTile(tile: Tile, focusKey: String, registry: FocusRegistry, onFocu
 
 /**
  * A Live TV channel: the logo on a dark card, the channel number and a red
- * LIVE dot (the first tile, id 0, is "Live TV": the last channel). No trailer.
+ * LIVE dot (the first tile, id 0, is "直播电视": the last channel). No trailer.
  */
 @Composable
 fun ChannelTile(tile: Tile, focusKey: String, registry: FocusRegistry, onFocused: () -> Unit, onClick: () -> Unit) {
@@ -221,8 +221,8 @@ fun ChannelTile(tile: Tile, focusKey: String, registry: FocusRegistry, onFocused
     ) {
         if (tile.channelId == null) {
             Column(Modifier.align(Alignment.CenterStart).padding(start = 16.dp)) {
-                Text("Live TV", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(tile.subtitle ?: "Watch now", color = Color(0xCCFFFFFF), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text("直播电视", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                Text(tile.subtitle ?: "立即观看", color = Color(0xCCFFFFFF), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         } else {
             Box(Modifier.align(Alignment.Center).padding(horizontal = 30.dp, vertical = 22.dp).fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -569,7 +569,7 @@ fun HeroBillboard(
     onPlay: (Tile) -> Unit,
     onMoreInfo: (Tile) -> Unit,
     modifier: Modifier = Modifier,
-    playLabel: (Tile) -> String = { "Play" }
+    playLabel: (Tile) -> String = { "播放" }
 ) {
     if (tiles.isEmpty()) return
     val preview = LocalPreviewPlayer.current
@@ -639,7 +639,7 @@ fun HeroBillboard(
                 modifier = Modifier.padding(top = 14.dp)
             ) {
                 PillButton(playLabel(tile), { onPlay(tile) }, icon = Icons.Filled.PlayArrow, focusRequester = playRequester)
-                PillButton("More Info", { onMoreInfo(tile) }, icon = Icons.Filled.Info)
+                PillButton("更多信息", { onMoreInfo(tile) }, icon = Icons.Filled.Info)
                 if (tiles.size > 1) {
                     Row(horizontalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.padding(start = 14.dp)) {
                         tiles.indices.forEach { i ->
@@ -678,7 +678,7 @@ fun BrowseFeed(
     actions: TileActions,
     modifier: Modifier = Modifier,
     topInset: Dp = Tv.NavHeight,
-    heroPlayLabel: (Tile) -> String = { "Play" }
+    heroPlayLabel: (Tile) -> String = { "播放" }
 ) {
     val scope = rememberCoroutineScope()
     val heroes = remember(feed) { feed.heroList }

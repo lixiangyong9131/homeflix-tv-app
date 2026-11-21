@@ -129,7 +129,7 @@ abstract class FeedViewModel(private val cache: FeedCache) : ViewModel() {
                 )
                 else -> _state.value = _state.value.copy(loading = false)
             }
-            result.exceptionOrNull()?.let { Log.w("Feed", "$cacheName refresh failed", it) }
+            result.exceptionOrNull()?.let { Log.w("推荐", "$cacheName refresh failed", it) }
         }
     }
 }
@@ -137,7 +137,7 @@ abstract class FeedViewModel(private val cache: FeedCache) : ViewModel() {
 private fun describeFailure(e: Throwable?): String {
     val server = com.homeflix.tv.util.ServerConfig.activeApiBase.removeSuffix("/api")
     val why = when (e) {
-        null -> return "Nothing here yet."
+        null -> return "暂无内容"
         is java.net.ConnectException, is java.net.NoRouteToHostException -> "connection refused or no route"
         is java.net.SocketTimeoutException, is kotlinx.coroutines.TimeoutCancellationException -> "timed out"
         is java.net.UnknownHostException -> "unknown host"
@@ -184,19 +184,19 @@ internal class Loaders(private val repo: MediaRepository) {
 
 internal object Rows {
     val GENRES = listOf(
-        "Action" to listOf("action"),
-        "Comedies" to listOf("comedy"),
-        "Dramas" to listOf("drama"),
-        "Sci-Fi" to listOf("science fiction", "sci-fi"),
-        "Thrillers" to listOf("thriller"),
-        "Crime" to listOf("crime"),
-        "Horror" to listOf("horror"),
-        "Romance" to listOf("romance"),
-        "Animation" to listOf("animation"),
-        "Family" to listOf("family"),
-        "Adventure" to listOf("adventure"),
-        "Mystery" to listOf("mystery"),
-        "Documentaries" to listOf("documentary")
+        "动作" to listOf("action"),
+        "喜剧片" to listOf("comedy"),
+        "剧情片" to listOf("drama"),
+        "科幻片" to listOf("science fiction", "sci-fi"),
+        "惊悚片" to listOf("thriller"),
+        "犯罪" to listOf("crime"),
+        "恐怖" to listOf("horror"),
+        "爱情" to listOf("romance"),
+        "动画" to listOf("animation"),
+        "家庭" to listOf("family"),
+        "冒险" to listOf("adventure"),
+        "悬疑" to listOf("mystery"),
+        "纪录片" to listOf("documentary")
     )
 
     fun mediaGenres(m: Media): List<String> =
@@ -278,7 +278,7 @@ internal object Rows {
             .distinctBy { it.media.seriesId?.takeIf { s -> s > 0 }?.let { s -> "s$s" } ?: "m${it.mediaId}" }
             .mapNotNull { Tiles.continueWatching(it, byId) }
             .take(15)
-        return if (tiles.isEmpty()) null else ContentRow("continue", "Continue Watching", tiles, RowStyle.LANDSCAPE)
+        return if (tiles.isEmpty()) null else ContentRow("continue", "继续观看", tiles, RowStyle.LANDSCAPE)
     }
 
     /** Movie genre rows (title → tiles, newest first), the viewer's favourite genres first. */
@@ -292,9 +292,9 @@ internal object Rows {
     fun seriesGenreCandidates(series: List<TvSeries>, topFeatures: List<String>?): List<Pair<String, List<Tile>>> =
         Taste.byTaste(GENRES, topFeatures) { title, keys ->
             val items = series.filter { s -> s.genres.any { g -> keys.any { k -> g.lowercase().contains(k) } } }
-            if (items.isEmpty()) null else ("$title Shows".replace("Dramas Shows", "Drama Shows")
-                .replace("Comedies Shows", "Comedy Shows").replace("Thrillers Shows", "Thriller Shows")
-                .replace("Documentaries Shows", "Documentary Series")) to items.map { Tiles.series(it, "sg${title.take(3)}") }
+            if (items.isEmpty()) null else ("$title Shows".replace("剧情剧集", "剧情剧集")
+                .replace("喜剧剧集", "喜剧剧集").replace("惊悚剧集", "惊悚剧集")
+                .replace("纪录剧集", "纪录剧集")) to items.map { Tiles.series(it, "sg${title.take(3)}") }
         }
 
     fun isEpisode(item: RecentlyWatchedItem) =
@@ -364,36 +364,36 @@ class HomeFeedBuilder(
         }
         val chart = chartD.await()
         (lib.top10(chart, "t") ?: Rows.top10(movies).mapIndexed { i, m -> Tiles.movie(m, "t", i + 1) }).let { top ->
-            p.add(3, "top10", Charts.title("Titles", chart).replace("Top 10 Titles", "Top 10"), top, RowStyle.TOP10, min = 5, max = 10, exclusive = false)
+            p.add(3, "top10", Charts.title("影片", chart).replace("排行榜前十", "十大排行"), top, RowStyle.TOP10, min = 5, max = 10, exclusive = false)
         }
         val myList = listedShowsD.await().mapNotNull { seriesById[it] }.map { Tiles.series(it, "mls") } +
             myListD.await().map { Tiles.movie(it, "ml") }
-        p.add(1, "mylist", "My List", myList, min = 1, exclusive = false)
-        liveD.await()?.let { p.add(1, "livetv", "Live TV", it, RowStyle.CHANNEL, min = 1, max = com.homeflix.tv.livetv.LiveTvHome.MAX, exclusive = false) }
+        p.add(1, "mylist", "我的片单", myList, min = 1, exclusive = false)
+        liveD.await()?.let { p.add(1, "livetv", "直播电视", it, RowStyle.CHANNEL, min = 1, max = com.homeflix.tv.livetv.LiveTvHome.MAX, exclusive = false) }
         themed["top-picks"]?.firstOrNull()?.let { r ->
-            p.add(2, "recommended", r.title ?: "Top Picks for You", lib.tiles(r, "fy"), max = 15)
-        } ?: p.add(2, "recommended", "Recommended for You",
+            p.add(2, "recommended", r.title ?: "为你精选", lib.tiles(r, "fy"), max = 15)
+        } ?: p.add(2, "recommended", "为你推荐",
             recommendedD.await().distinctBy { it.id }.map { Tiles.movie(it, "rc") })
         val newest = (movies.filter { it.type == MediaType.MOVIE }.map { (it.createdAt?.time ?: 0L) to Tiles.movie(it, "n") } +
             series.map { Rows.addedAt(it) to Tiles.series(it, "ns") }).sortedByDescending { it.first }.map { it.second }
-        p.add(4, "new", "New on HomeFlix", newest)
+        p.add(4, "new", "最新上线", newest)
         // Coming Soon (not in the library, so never a duplicate): right after what's new.
         comingD.await()?.let { (movies, series) ->
-            p.add(4, "coming-movies", "Coming Soon: Movies", movies, RowStyle.COMING, min = 1, exclusive = false)
-            p.add(4, "coming-series", "Coming Soon: Series", series, RowStyle.COMING, min = 1, exclusive = false)
+            p.add(4, "coming-movies", "即将上线：电影", movies, RowStyle.COMING, min = 1, exclusive = false)
+            p.add(4, "coming-series", "即将上线：剧集", series, RowStyle.COMING, min = 1, exclusive = false)
         }
-        themed["because"].orEmpty().take(3).forEachIndexed { i, r -> p.add(5 + i, "because$i", r.title ?: "Because You Watched", lib.tiles(r, "by$i"), min = 3) }
-        themed["collection"].orEmpty().take(1).forEach { r -> p.add(8, "collection", r.title ?: "Continue the Collection", lib.tiles(r, "co"), min = 2) }
-        themed["new-for-you"]?.firstOrNull()?.let { r -> p.add(9, "new-for-you", r.title ?: "New for You", lib.tiles(r, "nf"), min = 3) }
+        themed["because"].orEmpty().take(3).forEachIndexed { i, r -> p.add(5 + i, "because$i", r.title ?: "因为你看过", lib.tiles(r, "by$i"), min = 3) }
+        themed["collection"].orEmpty().take(1).forEach { r -> p.add(8, "collection", r.title ?: "继续观看系列", lib.tiles(r, "co"), min = 2) }
+        themed["new-for-you"]?.firstOrNull()?.let { r -> p.add(9, "new-for-you", r.title ?: "为你推荐", lib.tiles(r, "nf"), min = 3) }
         (themed["actor"].orEmpty().take(2) + themed["director"].orEmpty().take(1)).forEachIndexed { i, r ->
-            p.add(10 + i, "people$i", r.title ?: "More Like This", lib.tiles(r, "pp$i"), min = 3)
+            p.add(10 + i, "people$i", r.title ?: "更多类似", lib.tiles(r, "pp$i"), min = 3)
         }
-        themed["hidden-gems"]?.firstOrNull()?.let { r -> p.add(13, "gems", r.title ?: "Hidden Gems for You", lib.tiles(r, "hg")) }
+        themed["hidden-gems"]?.firstOrNull()?.let { r -> p.add(13, "gems", r.title ?: "为你发现的宝藏", lib.tiles(r, "hg")) }
         trendingD.await().ifEmpty { movies.sortedByDescending { it.rating } }.let { t ->
-            p.add(14, "trending", "Trending Now", t.map { Tiles.movie(it, "tr") })
+            p.add(14, "trending", "热门推荐", t.map { Tiles.movie(it, "tr") })
         }
-        p.add(15, "shows", "TV Shows", series.sortedByDescending { Rows.addedAt(it) }.map { Tiles.series(it) })
-        p.add(16, "acclaimed", "Critically Acclaimed", movies.filter { it.rating >= 7.5 }.sortedByDescending { it.rating }.map { Tiles.movie(it, "ca") })
+        p.add(15, "shows", "电视剧", series.sortedByDescending { Rows.addedAt(it) }.map { Tiles.series(it) })
+        p.add(16, "acclaimed", "口碑佳作", movies.filter { it.rating >= 7.5 }.sortedByDescending { it.rating }.map { Tiles.movie(it, "ca") })
         Rows.genreCandidates(latest, taste?.topFeatures).forEachIndexed { i, (title, tiles) ->
             p.add(20 + i, "h-genre-$title", title, tiles.map { it.copy(key = "h${title.take(3)}${it.id}") }, min = 5)
         }
@@ -430,16 +430,16 @@ class ShowsFeedViewModel @Inject constructor(
             p.add(0, cw.id, cw.title, cw.tiles, RowStyle.LANDSCAPE, min = 1, exclusive = false)
         }
         val chart = chartD.await()
-        lib.top10(chart, "st")?.let { top -> p.add(2, "shows-top10", Charts.title("Shows", chart), top, RowStyle.TOP10, min = 5, max = 10, exclusive = false) }
-        themed["top-picks"]?.firstOrNull()?.let { r -> p.add(1, "shows-picks", "Top Picks for You", lib.tiles(r, "sp"), min = 3, max = 15) }
-        p.add(3, "shows-new", "New Episodes & Shows", latest.map { Tiles.series(it, "sn") }, min = 3)
-        themed["because"].orEmpty().take(2).forEachIndexed { i, r -> p.add(4 + i, "shows-because$i", r.title ?: "Because You Watched", lib.tiles(r, "sb$i"), min = 3) }
-        themed["new-for-you"]?.firstOrNull()?.let { r -> p.add(6, "shows-nfy", r.title ?: "New for You", lib.tiles(r, "snf"), min = 3) }
-        p.add(7, "shows-top", "Top Rated Shows", series.filter { it.rating > 0 }.sortedByDescending { it.rating }.map { s -> Tiles.series(s, "st") })
+        lib.top10(chart, "st")?.let { top -> p.add(2, "shows-top10", Charts.title("剧集", chart), top, RowStyle.TOP10, min = 5, max = 10, exclusive = false) }
+        themed["top-picks"]?.firstOrNull()?.let { r -> p.add(1, "shows-picks", "为你精选", lib.tiles(r, "sp"), min = 3, max = 15) }
+        p.add(3, "shows-new", "最新剧集", latest.map { Tiles.series(it, "sn") }, min = 3)
+        themed["because"].orEmpty().take(2).forEachIndexed { i, r -> p.add(4 + i, "shows-because$i", r.title ?: "因为你看过", lib.tiles(r, "sb$i"), min = 3) }
+        themed["new-for-you"]?.firstOrNull()?.let { r -> p.add(6, "shows-nfy", r.title ?: "为你推荐", lib.tiles(r, "snf"), min = 3) }
+        p.add(7, "shows-top", "高分剧集", series.filter { it.rating > 0 }.sortedByDescending { it.rating }.map { s -> Tiles.series(s, "st") })
         Rows.seriesGenreCandidates(latest, taste?.topFeatures).forEachIndexed { i, (title, tiles) ->
             p.add(10 + i, "shows-genre-$title", title, tiles, min = 4)
         }
-        p.leftovers(99, "shows-more", "More Shows", series.sortedBy { it.title.lowercase() }.map { Tiles.series(it, "sa") })
+        p.leftovers(99, "shows-more", "更多剧集", series.sortedBy { it.title.lowercase() }.map { Tiles.series(it, "sa") })
         val heroTiles = (latest.filter { !it.description.isNullOrBlank() }.take(5).ifEmpty { latest.take(5) })
             .map { Tiles.series(it, "hero") }
         Feed(hero = heroTiles.firstOrNull(), rows = p.rows, heroes = heroTiles)
@@ -477,22 +477,22 @@ class MoviesFeedViewModel @Inject constructor(
         }
         val chart = chartD.await()
         (lib.top10(chart, "mt") ?: Rows.top10(movies).mapIndexed { i, m -> Tiles.movie(m, "mt", i + 1) }).let { top ->
-            p.add(2, "movies-top10", Charts.title("Movies", chart), top, RowStyle.TOP10, min = 5, max = 10, exclusive = false)
+            p.add(2, "movies-top10", Charts.title("电影", chart), top, RowStyle.TOP10, min = 5, max = 10, exclusive = false)
         }
-        themed["top-picks"]?.firstOrNull()?.let { r -> p.add(1, "movies-picks", "Top Picks for You", lib.tiles(r, "mp"), max = 15) }
-        p.add(3, "movies-new", "Recently Added Movies", latest.map { Tiles.movie(it, "mn") })
-        themed["because"].orEmpty().take(3).forEachIndexed { i, r -> p.add(4 + i, "movies-because$i", r.title ?: "Because You Watched", lib.tiles(r, "mb$i"), min = 3) }
-        themed["collection"].orEmpty().take(1).forEach { r -> p.add(7, "movies-collection", r.title ?: "Continue the Collection", lib.tiles(r, "mc"), min = 2) }
-        themed["new-for-you"]?.firstOrNull()?.let { r -> p.add(8, "movies-nfy", r.title ?: "New for You", lib.tiles(r, "mnf"), min = 3) }
+        themed["top-picks"]?.firstOrNull()?.let { r -> p.add(1, "movies-picks", "为你精选", lib.tiles(r, "mp"), max = 15) }
+        p.add(3, "movies-new", "最近添加电影", latest.map { Tiles.movie(it, "mn") })
+        themed["because"].orEmpty().take(3).forEachIndexed { i, r -> p.add(4 + i, "movies-because$i", r.title ?: "因为你看过", lib.tiles(r, "mb$i"), min = 3) }
+        themed["collection"].orEmpty().take(1).forEach { r -> p.add(7, "movies-collection", r.title ?: "继续观看系列", lib.tiles(r, "mc"), min = 2) }
+        themed["new-for-you"]?.firstOrNull()?.let { r -> p.add(8, "movies-nfy", r.title ?: "为你推荐", lib.tiles(r, "mnf"), min = 3) }
         (themed["actor"].orEmpty().take(2) + themed["director"].orEmpty().take(1)).forEachIndexed { i, r ->
-            p.add(9 + i, "movies-people$i", r.title ?: "More Like This", lib.tiles(r, "mpp$i"), min = 3)
+            p.add(9 + i, "movies-people$i", r.title ?: "更多类似", lib.tiles(r, "mpp$i"), min = 3)
         }
-        themed["hidden-gems"]?.firstOrNull()?.let { r -> p.add(12, "movies-gems", r.title ?: "Hidden Gems for You", lib.tiles(r, "mg")) }
-        p.add(13, "movies-rated", "Critically Acclaimed", topRated.map { Tiles.movie(it, "mr") })
+        themed["hidden-gems"]?.firstOrNull()?.let { r -> p.add(12, "movies-gems", r.title ?: "为你发现的宝藏", lib.tiles(r, "mg")) }
+        p.add(13, "movies-rated", "口碑佳作", topRated.map { Tiles.movie(it, "mr") })
         Rows.genreCandidates(latest, taste?.topFeatures).forEachIndexed { i, (title, tiles) ->
             p.add(20 + i, "mv-genre-$title", title, tiles.map { it.copy(key = "mv${title.take(3)}${it.id}") }, min = 5)
         }
-        p.leftovers(99, "movies-more", "More Movies", movies.sortedBy { it.title.lowercase() }.map { Tiles.movie(it, "ma") })
+        p.leftovers(99, "movies-more", "更多电影", movies.sortedBy { it.title.lowercase() }.map { Tiles.movie(it, "ma") })
         val heroTiles = Rows.heroMix(latest.take(10), topRated.take(10)).map { Tiles.movie(it, "hero") }
         Feed(hero = heroTiles.firstOrNull(), rows = p.rows, heroes = heroTiles)
     }
@@ -528,10 +528,10 @@ class MyHomeFlixViewModel @Inject constructor(
         val rows = buildList {
             Rows.continueWatching(recent)?.let(::add)
             val listTiles = listedShows + myList.map { Tiles.movie(it, "ml") }
-            if (listTiles.isNotEmpty()) add(ContentRow("mylist", "My List", listTiles))
+            if (listTiles.isNotEmpty()) add(ContentRow("mylist", "我的片单", listTiles))
             val watched = recent.filter { !Rows.isEpisode(it) && it.durationSeconds > 0 &&
                 it.progressSeconds >= it.durationSeconds * 0.9 }
-            if (watched.isNotEmpty()) add(ContentRow("watched", "Watch It Again", watched.map { Tiles.movie(it.media, "wa") }))
+            if (watched.isNotEmpty()) add(ContentRow("watched", "再看一遍", watched.map { Tiles.movie(it.media, "wa") }))
         }
         if (rows.isEmpty()) error("empty")
         Feed(hero = null, rows = rows)

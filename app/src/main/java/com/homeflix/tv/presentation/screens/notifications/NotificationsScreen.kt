@@ -85,7 +85,7 @@ fun NotificationsScreen(navigator: AppNavigator, vm: NotificationsViewModel = hi
     Box(Modifier.fillMaxSize().background(Tv.Background)) {
         when (val s = state) {
             NotificationsUiState.Loading -> LoadingState()
-            is NotificationsUiState.Error -> ErrorState("Couldn't load notifications", onRetry = vm::loadNotifications)
+            is NotificationsUiState.Error -> ErrorState("无法加载通知", onRetry = vm::loadNotifications)
             is NotificationsUiState.Success ->
                 if (s.notifications.isEmpty()) EmptyNotifications()
                 else NotificationsContent(s.notifications.distinctBy { it.id }, navigator)
@@ -101,7 +101,7 @@ private fun open(n: Notification, navigator: AppNavigator) {
     }
 }
 
-private enum class NotifFilter(val label: String) { ALL("All"), MOVIES("Movies"), SHOWS("Shows") }
+private enum class NotifFilter(val label: String) { ALL("全部"), MOVIES("电影"), SHOWS("剧集") }
 
 private fun NotifFilter.matches(n: Notification) = when (this) {
     NotifFilter.ALL -> true
@@ -109,18 +109,18 @@ private fun NotifFilter.matches(n: Notification) = when (this) {
     NotifFilter.SHOWS -> n.targetType == "series"
 }
 
-/** "Today", "Yesterday", "This Week", "Earlier". */
+/** "今天", "昨天", "本周", "更早". */
 private fun dayGroup(seconds: Long): String {
-    if (seconds <= 0) return "Earlier"
+    if (seconds <= 0) return "更早"
     val cal = java.util.Calendar.getInstance()
     cal.set(java.util.Calendar.HOUR_OF_DAY, 0); cal.set(java.util.Calendar.MINUTE, 0)
     cal.set(java.util.Calendar.SECOND, 0); cal.set(java.util.Calendar.MILLISECOND, 0)
     val today = cal.timeInMillis / 1000
     return when {
-        seconds >= today -> "Today"
-        seconds >= today - 86_400 -> "Yesterday"
-        seconds >= today - 6 * 86_400 -> "This Week"
-        else -> "Earlier"
+        seconds >= today -> "今天"
+        seconds >= today - 86_400 -> "昨天"
+        seconds >= today - 6 * 86_400 -> "本周"
+        else -> "更早"
     }
 }
 
@@ -155,7 +155,7 @@ internal fun NotificationsContent(items: List<Notification>, navigator: AppNavig
             // ---------------------------------------------------------------- list
             Column(Modifier.width(500.dp).fillMaxHeight().padding(start = Tv.Keyline, top = Tv.NavHeight + 8.dp)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("Notifications", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                    Text("通知", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
                     if (unread > 0) {
                         Text("$unread new", color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(start = 10.dp).clip(RoundedCornerShape(50))
@@ -303,7 +303,7 @@ private fun NotificationCard(n: Notification, modifier: Modifier, onFocused: () 
         Column(Modifier.padding(start = 12.dp).weight(1f)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (!n.read) {
-                    Text("NEW", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold,
+                    Text("新", color = Color.White, fontSize = 9.sp, fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(end = 6.dp).clip(RoundedCornerShape(3.dp)).background(Tv.Red).padding(horizontal = 4.dp, vertical = 1.dp))
                 }
                 Text(timeAgo(n.timestampSeconds), color = if (isFocused) Color.DarkGray else Tv.TextMuted, fontSize = 11.sp)
@@ -336,17 +336,17 @@ private fun EmptyNotifications() {
     Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
         Icon(Icons.Filled.NotificationsNone, null, tint = Tv.TextMuted, modifier = Modifier.size(56.dp))
         Spacer(Modifier.height(14.dp))
-        Text("You're all caught up", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+        Text("没有新通知", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         Text("New movies and episodes in your library will show up here.", color = Tv.TextSecondary, fontSize = 14.sp,
             modifier = Modifier.padding(top = 6.dp))
     }
 }
 
 private fun timeAgo(seconds: Long): String {
-    if (seconds <= 0) return "Recently"
+    if (seconds <= 0) return "最近"
     val diff = System.currentTimeMillis() / 1000 - seconds
     return when {
-        diff < 3600 -> "Just now"
+        diff < 3600 -> "刚刚"
         diff < 86_400 -> "${diff / 3600}h ago"
         diff < 7 * 86_400 -> "${diff / 86_400}d ago"
         else -> java.text.SimpleDateFormat("MMM d", java.util.Locale.getDefault()).format(java.util.Date(seconds * 1000))

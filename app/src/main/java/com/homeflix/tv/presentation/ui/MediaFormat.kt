@@ -9,7 +9,7 @@ object MediaFormat {
 
     /** "Movie • Drama • 2025 • 2h 32m • 18+" */
     fun metaLine(media: Media): String = buildList {
-        add(if (media.type == MediaType.MOVIE) "Movie" else "Show")
+        add(if (media.type == MediaType.MOVIE) "电影" else "剧集")
         genreOf(media)?.let(::add)
         media.year?.takeIf { it > 0 }?.let { add(it.toString()) }
         runtime(media)?.let(::add)
@@ -53,7 +53,7 @@ object MediaFormat {
     }
 
     fun languageName(code: String?): String {
-        if (code.isNullOrBlank() || code == "und") return "Unknown"
+        if (code.isNullOrBlank() || code == "und") return "未知"
         val name = runCatching { Locale(code).getDisplayLanguage(Locale.ENGLISH) }.getOrNull()
         return if (name.isNullOrBlank() || name.equals(code, ignoreCase = true)) code.uppercase(Locale.US) else name
     }

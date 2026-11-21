@@ -86,7 +86,7 @@ fun SubPageTopBar(navigator: AppNavigator, visible: Boolean = true) {
             Spacer(Modifier.weight(1f))
             NavBell(unread = unread, canFocus = visible, onClick = { navigator.go(com.homeflix.tv.presentation.navigation.Screen.Notifications.route) })
             Spacer(Modifier.width(10.dp))
-            NavIconButton(Icons.Filled.Person, "Profile", canFocus = visible, onClick = { menuOpen = true })
+            NavIconButton(Icons.Filled.Person, "个人中心", canFocus = visible, onClick = { menuOpen = true })
         }
     }
     if (menuOpen) {

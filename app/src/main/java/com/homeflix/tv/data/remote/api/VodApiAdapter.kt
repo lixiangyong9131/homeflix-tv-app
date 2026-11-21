@@ -56,7 +56,7 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
         runCatching { o.get(k)?.takeUnless { it.isJsonNull }?.asString ?: "" }.getOrDefault("")
 
     // ---------- Douban -> MediaDto ----------
-    private fun doubanDto(s: JsonObject): MediaDto? {
+    private fun doubanDto(s: JsonObject, mediaType: String = "movie", tag: String = ""): MediaDto? {
         val dbId = opt(s, "id").ifBlank { return null }
         val title = opt(s, "title").ifBlank { return null }
         // Douban returns the small s_ratio_poster thumbnail by default;
@@ -66,8 +66,9 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
         val key = dbId.hashCode()
         val dto = MediaDto(
             id = key, uuid = "douban:$dbId", title = title,
-            type = "movie", filePath = "", fileSize = 0L, duration = 0,
+            type = mediaType, filePath = "", fileSize = 0L, duration = 0,
             description = null, year = null, rating = rate,
+            genreNames = listOf(tag).filter { it.isNotBlank() },
             posterPath = cover.ifBlank { null },
             bannerPath = cover.ifBlank { null },
             thumbnailPath = cover.ifBlank { null },
@@ -86,19 +87,21 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
             "&sort=recommend&page_limit=20&page_start=$start"
         val root = json(u) ?: return emptyList()
         val arr = root.getAsJsonArray("subjects") ?: return emptyList()
-        return arr.mapNotNull { runCatching { it.asJsonObject }.getOrNull() }.mapNotNull { doubanDto(it) }
+        return arr.mapNotNull { runCatching { it.asJsonObject }.getOrNull() }.mapNotNull { doubanDto(it, type, tag) }
     }
 
     @Synchronized
     private fun doubanAll(): List<MediaDto> {
         allCache?.let { if (it.isNotEmpty()) return it }
         val out = mutableListOf<MediaDto>()
-        doubanFetch("热门", "movie").let { out.addAll(it) }
-        doubanFetch("豆瓣高分", "movie").let { out.addAll(it) }
-        doubanFetch("热门", "tv").let { out.addAll(it) }
-        doubanFetch("最新", "movie").let { out.addAll(it) }
+        // Richer home feed: many Douban charts (~0.3s each).
+        val movieTags = listOf("热门", "豆瓣高分", "最新", "经典", "华语", "欧美", "韩国", "日本", "动作", "喜剧", "爱情", "科幻", "悬疑")
+        val tvTags = listOf("热门", "豆瓣高分", "最新", "华语", "欧美", "日剧", "韩剧")
+        for (tag in movieTags) doubanFetch(tag, "movie").let { out.addAll(it) }
+        for (tag in tvTags) doubanFetch(tag, "tv").let { out.addAll(it) }
         val distinct = out.distinctBy { it.uuid }
         allCache = distinct
+        android.util.Log.i("DoubanVod", "loaded ${distinct.size} titles from Douban charts")
         return distinct
     }
 
@@ -146,23 +149,34 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
     @Synchronized
     private fun resolvePlayUrl(id: Int): String {
         playCache[id]?.let { return it }
-        val title = titleOf[id] ?: findById(id.toString())?.title ?: return ""
+        val title = titleOf[id] ?: findById(id.toString())?.title ?: ""
+        if (title.isBlank()) { android.util.Log.w("DoubanVod", "no title for id=$id"); return "" }
         val q = normalizeTitle(title)
-        val search = vodJson("$VOD_API?ac=vod&wd=" + URLEncoder.encode(q, "UTF-8"))
-        val rows = search?.getAsJsonArray("list") ?: run {
-            val short = q.replace(Regex("\\d+$"), "").trim()
-            vodJson("$VOD_API?ac=vod&wd=" + URLEncoder.encode(short, "UTF-8"))?.getAsJsonArray("list")
-        } ?: return ""
-        val cand = rows.mapNotNull { runCatching { it.asJsonObject }.getOrNull() }.firstOrNull { v ->
-            val n = normalizeTitle(opt(v, "vod_name"))
-            n.contains(q.take(6), true) || q.contains(n.take(6), true)
-        } ?: rows.firstOrNull()?.asJsonObject ?: return ""
-        val vid = opt(cand, "vod_id")
-        val detail = vodJson("$VOD_API?ac=detail&ids=" + URLEncoder.encode(vid, "UTF-8"))
-        val v = (detail?.getAsJsonArray("list")?.firstOrNull()?.asJsonObject ?: cand)
-        val url = pickPlayUrl(v)
-        playCache[id] = url
-        return url
+        android.util.Log.i("DoubanVod", "resolve '$title' -> '$q'")
+        // Try several title forms and multiple VOD sources before giving up.
+        val queries = linkedMapOf<String, String>()
+        queries[q] = VOD_API
+        q.replace(Regex("\\d+$"), "").trim().takeIf { it.isNotBlank() && it != q }?.let { queries[it] = VOD_API }
+        if (q.length > 4) queries[q.take(4)] = VOD_API
+        queries[q] = "https://caiji.maotaizy.cc/api.php/provide/vod"
+        for ((query, base) in queries) {
+            val rows = vodJson("$base?ac=vod&wd=" + URLEncoder.encode(query, "UTF-8"))?.getAsJsonArray("list") ?: continue
+            val cand = rows.mapNotNull { runCatching { it.asJsonObject }.getOrNull() }.firstOrNull { v ->
+                val n = normalizeTitle(opt(v, "vod_name"))
+                n.contains(query.take(5), true) || query.contains(n.take(5), true)
+            } ?: rows.firstOrNull()?.asJsonObject ?: continue
+            val vid = opt(cand, "vod_id")
+            val detail = vodJson("$base?ac=detail&ids=" + URLEncoder.encode(vid, "UTF-8"))
+            val v = (detail?.getAsJsonArray("list")?.firstOrNull()?.asJsonObject ?: cand)
+            val url = pickPlayUrl(v)
+            if (url.isNotBlank()) {
+                android.util.Log.i("DoubanVod", "OK '$title' -> ${url.take(90)}")
+                playCache[id] = url
+                return url
+            }
+        }
+        android.util.Log.w("DoubanVod", "NO PLAY URL for '$title'")
+        return ""
     }
 
     @Synchronized
@@ -380,7 +394,7 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
 
     override suspend fun getGenreById(id: Int): Response<GenreDto> = withContext(Dispatchers.IO) {
         val names = doubanAll().mapNotNull { it.genreNames?.firstOrNull() }.distinct()
-        Response.success(GenreDto(id = id, name = names.getOrNull(id - 1) ?: "Movie"))
+        Response.success(GenreDto(id = id, name = names.getOrNull(id - 1) ?: "电影"))
     }
 
     override suspend fun getTvSeries(sort: String?, order: String?, limit: Int?, offset: Int?): Response<List<MediaDto>> = withContext(Dispatchers.IO) {

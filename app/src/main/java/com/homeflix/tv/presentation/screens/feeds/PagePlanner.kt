@@ -60,7 +60,7 @@ class PagePlanner(private val librarySize: Int = Int.MAX_VALUE) {
         return row
     }
 
-    /** Everything not yet on the page, e.g. "More Movies" at the bottom, so every title stays reachable. */
+    /** Everything not yet on the page, e.g. "更多电影" at the bottom, so every title stays reachable. */
     fun leftovers(order: Int, id: String, title: String, all: List<Tile>, min: Int = 1, max: Int = 200) =
         add(order, id, title, all, min = min, max = max)
 
@@ -99,7 +99,7 @@ internal class Library(movies: List<Media>, series: List<TvSeries>) {
 }
 
 internal object Charts {
-    /** "Top 10 Movies on HomeFlix This Week", or without "This Week" when the chart isn't from this week's plays. */
+    /** "本周十大电影", or without "本周" when the chart isn't from this week's plays. */
     fun title(what: String, chart: ChartDto?): String {
         val thisWeek = chart != null && chart.windowDays in 1..7 && chart.source != "catalog"
         return "Top 10 $what on HomeFlix" + if (thisWeek) " This Week" else ""

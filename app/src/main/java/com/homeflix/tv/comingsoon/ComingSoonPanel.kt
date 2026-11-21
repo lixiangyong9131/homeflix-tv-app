@@ -46,7 +46,7 @@ class ComingSoonPanelViewModel @Inject constructor(private val repo: ComingSoonR
 /** Buttons for a title page's action row: "Season 3 · In 20 days" (plays the trailer) and Notify Me. */
 @Composable
 fun RowScope.ComingSoonActions(item: ComingSoonItem, onTrailer: () -> Unit, onNotify: () -> Unit) {
-    val label = listOfNotNull(item.releaseLabel?.takeIf { it.isNotBlank() } ?: "Coming Soon", ComingSoonDates.countdown(item.daysUntil))
+    val label = listOfNotNull(item.releaseLabel?.takeIf { it.isNotBlank() } ?: "即将上线", ComingSoonDates.countdown(item.daysUntil))
         .joinToString("  ·  ")
     PillButton("$label  Trailer", onTrailer, icon = Icons.Filled.PlayCircle)
     PillButton(if (item.notifyOn) "We'll Notify You" else "Notify Me", onNotify,

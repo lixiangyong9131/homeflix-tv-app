@@ -134,7 +134,7 @@ fun SearchContent(
             ) {
                 Icon(Icons.Filled.Search, null, tint = Tv.TextMuted, modifier = Modifier.size(18.dp))
                 Text(
-                    state.query.ifEmpty { "Search movies & shows" },
+                    state.query.ifEmpty { "搜索电影和剧集" },
                     color = if (state.query.isEmpty()) Tv.TextMuted else Color.White,
                     fontSize = 15.sp,
                     maxLines = 1,

@@ -23,15 +23,15 @@ import javax.inject.Inject
 data class SearchState(
     val query: String = "",
     val genre: String? = null,
-    val title: String = "Your Search Recommendations",
+    val title: String = "搜索推荐",
     val results: List<Tile> = emptyList(),
     val loading: Boolean = false,
     val genres: List<String> = DEFAULT_GENRES
 )
 
 private val DEFAULT_GENRES = listOf(
-    "Action", "Comedy", "Drama", "Thriller", "Science Fiction", "Horror", "Romance",
-    "Animation", "Crime", "Adventure", "Family", "Mystery", "Documentary"
+    "动作", "喜剧", "剧情", "惊悚", "科幻", "恐怖", "爱情",
+    "动画", "犯罪", "冒险", "家庭", "悬疑", "纪录片"
 )
 
 @HiltViewModel
@@ -86,7 +86,7 @@ class SearchViewModel @Inject constructor(
         _state.update { it.copy(query = q, genre = null) }
         job?.cancel()
         if (q.isBlank()) {
-            _state.update { it.copy(title = "Your Search Recommendations", results = recommendations, loading = false) }
+            _state.update { it.copy(title = "搜索推荐", results = recommendations, loading = false) }
             return
         }
         job = viewModelScope.launch(guard) {

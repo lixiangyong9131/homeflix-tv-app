@@ -36,8 +36,8 @@ android {
     buildTypes {
         debug {
             signingConfig = signingConfigs.getByName("sideload")
-            buildConfigField("String", "BASE_URL", "\"http://192.168.0.109:8252/api/\"")
-            buildConfigField("String", "FALLBACK_BASE_URL", "\"https://homeflix.domain.com/api/\"")
+            buildConfigField("String", "BASE_URL", "\"http://127.0.0.1:8252/api/\"")
+            buildConfigField("String", "FALLBACK_BASE_URL", "\"http://127.0.0.1:8253/api/\"")
         }
         release {
             signingConfig = signingConfigs.getByName("sideload")
@@ -53,8 +53,8 @@ android {
             } else {
                 proguardFiles("proguard-safe.pro")
             }
-            buildConfigField("String", "BASE_URL", "\"http://192.168.0.109:8252/api/\"")
-            buildConfigField("String", "FALLBACK_BASE_URL", "\"https://homeflix.domain.com/api/\"")
+            buildConfigField("String", "BASE_URL", "\"http://127.0.0.1:8252/api/\"")
+            buildConfigField("String", "FALLBACK_BASE_URL", "\"http://127.0.0.1:8253/api/\"")
         }
     }
     compileOptions {

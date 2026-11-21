@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">HomeFlix TV</string>
+    <string name="app_name">影视</string>
     <string name="app_description">Your personal Netflix experience on Android TV</string>
     
     <!-- Navigation -->

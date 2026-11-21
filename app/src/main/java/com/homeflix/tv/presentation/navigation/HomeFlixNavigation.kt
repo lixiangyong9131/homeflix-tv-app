@@ -225,7 +225,7 @@ private fun BrowseShell(
     val notificationsState by notificationsVm.uiState.collectAsState()
     androidx.lifecycle.compose.LifecycleEventEffect(androidx.lifecycle.Lifecycle.Event.ON_RESUME) { notificationsVm.loadNotifications() }
     val unread = notificationsState.unreadCount
-    // "Live TV" on the top menu while the server has Live TV turned on.
+    // "直播电视" on the top menu while the server has Live TV turned on.
     val liveVm: com.homeflix.tv.livetv.LiveTvEntryViewModel = hiltViewModel(entry)
     val liveEnabled by liveVm.enabled.collectAsState()
     val comingVm: com.homeflix.tv.comingsoon.ComingSoonEntryViewModel = hiltViewModel(entry)
@@ -253,7 +253,7 @@ private fun BrowseShell(
                 val state by vm.state.collectAsState()
                 FeedPage(state, shell, navigator, onRetry = vm::refresh, onResumed = vm::refreshAfterReturn,
                     onOpenSettings = { navigator.go(Screen.Settings.route) },
-                    heroPlayLabel = { "Episodes" })
+                    heroPlayLabel = { "剧集列表" })
             }
             ShellTab.MOVIES -> {
                 val vm: MoviesFeedViewModel = hiltViewModel(entry)

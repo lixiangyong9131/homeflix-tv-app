@@ -7,7 +7,7 @@ import com.homeflix.tv.domain.model.RecentlyWatchedItem
 import com.homeflix.tv.presentation.screens.tvshows.TvSeries
 import com.homeflix.tv.util.ApiUtils
 
-/** CHANNEL = a Live TV channel ([Tile.channelId]); id 0 = "Live TV" (last channel). */
+/** CHANNEL = a Live TV channel ([Tile.channelId]); id 0 = "直播电视" (last channel). */
 enum class TileKind { MOVIE, SERIES, EPISODE, CHANNEL, COMING }
 
 /**
@@ -84,7 +84,7 @@ object Tiles {
         previewUrl = previewUrlFor(media),
         meta = MediaFormat.metaLine(media),
         description = MediaFormat.description(media),
-        badge = media.createdAt?.time?.let { if (System.currentTimeMillis() - it < NEW_WINDOW_MS) "Recently Added" else null },
+        badge = media.createdAt?.time?.let { if (System.currentTimeMillis() - it < NEW_WINDOW_MS) "最近添加" else null },
         rank = rank
     )
 
@@ -98,7 +98,7 @@ object Tiles {
         backdropUrl = ApiUtils.getSeriesBackdropUrl(series),
         logoUrl = ApiUtils.getSeriesLogoUrl(series.id),
         meta = buildList {
-            add("Show")
+            add("剧集")
             series.genres.firstOrNull { it.isNotBlank() }?.let(::add)
             series.year?.takeIf { it > 0 }?.let { add(it.toString()) }
             when {

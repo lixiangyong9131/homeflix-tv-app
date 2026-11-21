@@ -53,7 +53,7 @@ class DetailsViewModel @Inject constructor(
                 }
             }.getOrNull()
             if (media == null) {
-                _state.value = DetailsState(loading = false, error = "Couldn't load this title.")
+                _state.value = DetailsState(loading = false, error = "无法加载该影片")
                 return@launch
             }
             _state.update { it.copy(loading = false, media = media) }
@@ -115,6 +115,6 @@ class DetailsViewModel @Inject constructor(
             items = items + withTimeoutOrNull(6_000) { repo.getMovies(limit = 30).first().getOrNull() }.orEmpty()
         }
         val tiles = items.filter { it.id != media.id }.distinctBy { it.id }.take(20).map { Tiles.movie(it, "sim") }
-        return if (tiles.isEmpty()) null else ContentRow("similar", "More Like This", tiles)
+        return if (tiles.isEmpty()) null else ContentRow("similar", "更多类似", tiles)
     }
 }

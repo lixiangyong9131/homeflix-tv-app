@@ -82,7 +82,7 @@ class SettingsViewModel @Inject constructor(
 
     fun saveServer(input: String) {
         val base = ServerConfig.setLocal(context, input)
-        if (base == null) { serverCheck.value = "That doesn't look like a server address"; return }
+        if (base == null) { serverCheck.value = "这似乎不是有效的服务器地址"; return }
         serverCheck.value = "Checking ${base.removeSuffix("/api")}…"
         viewModelScope.launch(Dispatchers.IO) { checkServer(base) }
     }
@@ -124,16 +124,16 @@ fun SettingsScreen(navigator: com.homeflix.tv.presentation.navigation.AppNavigat
                 .padding(start = 72.dp, top = Tv.NavHeight + 20.dp, bottom = 80.dp).width(620.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Text("Settings", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Bold)
-            Text("Cast to this TV", color = Tv.TextSecondary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+            Text("设置", color = Color.White, fontSize = 32.sp, fontWeight = FontWeight.Bold)
+            Text("投屏到这台电视", color = Tv.TextSecondary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(top = 16.dp))
 
             // Status line
             val (dot, status) = when {
-                !enabled -> Tv.TextMuted to "Casting is turned off"
-                connState == CastConnection.State.CONNECTED -> Color(0xFF46D369) to "Ready to cast"
+                !enabled -> Tv.TextMuted to "投屏已关闭"
+                connState == CastConnection.State.CONNECTED -> Color(0xFF46D369) to "可以投屏"
                 connState == CastConnection.State.CONNECTING -> Color(0xFFE5B109) to "Connecting to the server…"
-                else -> Tv.Red to "Not connected to the server"
+                else -> Tv.Red to "未连接到服务器"
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(Modifier.size(10.dp).clip(CircleShape).background(dot))
@@ -141,16 +141,16 @@ fun SettingsScreen(navigator: com.homeflix.tv.presentation.navigation.AppNavigat
             }
 
             SettingRow(
-                title = "Allow casting to this TV",
-                value = if (enabled) "On" else "Off",
+                title = "允许投屏到这台电视",
+                value = if (enabled) "On" else "关闭",
                 onClick = { vm.setCastEnabled(!enabled) },
                 modifier = Modifier.focusRequester(first)
             )
             NameField(name = name, onSave = vm.cast::setName)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 SettingRow(
-                    title = "Allow HomeFlix to open from casting",
-                    value = if (overlayGranted) "Allowed" else "Not allowed",
+                    title = "允许从投屏打开",
+                    value = if (overlayGranted) "已允许" else "未允许",
                     subtitle = "Lets a cast start playback while another app is open (“Display over other apps”).",
                     onClick = { openOverlaySettings(context) }
                 )
@@ -159,7 +159,7 @@ fun SettingsScreen(navigator: com.homeflix.tv.presentation.navigation.AppNavigat
             ServerSection(vm)
             UpdatesSection(vm.updater)
 
-            Text("About", color = Tv.TextSecondary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+            Text("关于", color = Tv.TextSecondary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.padding(top = 18.dp))
             Text("Developed by ${Credits.DEVELOPER} · ${Credits.ROLE}", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
             Text("Contact: ${Credits.EMAIL} · ${Credits.GITHUB}", color = Tv.TextSecondary, fontSize = 14.sp)
@@ -176,21 +176,21 @@ private fun ServerSection(vm: SettingsViewModel) {
     val check by vm.serverCheck.collectAsState()
     var editing by remember { mutableStateOf(false) }
     val current = ServerConfig.LOCAL.removeSuffix("/api")
-    Text("Server", color = Tv.TextSecondary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+    Text("服务器", color = Tv.TextSecondary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(top = 18.dp))
     SettingRow(
-        title = "Server address",
+        title = "服务器地址",
         value = current.removePrefix("http://").removePrefix("https://"),
         subtitle = check ?: "Press OK to change (e.g. 192.168.0.109:8252)",
         onClick = { editing = true }
     )
     if (ServerConfig.LOCAL != ServerConfig.DEFAULT_LOCAL) {
-        SettingRow(title = "Reset to default server", value = ServerConfig.DEFAULT_LOCAL.removeSuffix("/api"),
+        SettingRow(title = "恢复默认服务器", value = ServerConfig.DEFAULT_LOCAL.removeSuffix("/api"),
             onClick = { vm.saveServer(ServerConfig.DEFAULT_LOCAL.removeSuffix("/api")) })
     }
     if (editing) {
         EditTextDialog(
-            title = "Server address",
+            title = "服务器地址",
             hint = "IP and port of your HomeFlix server, e.g. 192.168.0.109:8252",
             initial = current,
             uri = true,
@@ -205,10 +205,10 @@ private fun UpdatesSection(updater: com.homeflix.tv.update.AppUpdater) {
     val state by updater.state.collectAsState()
     var canInstall by remember { mutableStateOf(updater.canInstall()) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { canInstall = updater.canInstall() }
-    Text("App updates", color = Tv.TextSecondary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
+    Text("应用更新", color = Tv.TextSecondary, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
         modifier = Modifier.padding(top = 18.dp))
     val status = when (val s = state) {
-        com.homeflix.tv.update.UpdateState.Idle -> "Updates install from your HomeFlix server"
+        com.homeflix.tv.update.UpdateState.Idle -> "更新来自你的服务器"
         com.homeflix.tv.update.UpdateState.Checking -> "Checking for updates…"
         is com.homeflix.tv.update.UpdateState.UpToDate -> "HomeFlix is up to date"
         is com.homeflix.tv.update.UpdateState.Downloading -> "Downloading ${s.info.versionName ?: ""}… ${(s.progress * 100).toInt()}%"
@@ -220,17 +220,17 @@ private fun UpdatesSection(updater: com.homeflix.tv.update.AppUpdater) {
     val ready = state as? com.homeflix.tv.update.UpdateState.Ready
     if (ready != null) {
         SettingRow(
-            title = "Install update",
+            title = "安装更新",
             value = ready.info.versionName ?: ready.info.versionCode.toString(),
             onClick = { if (updater.canInstall()) updater.install() else updater.openInstallPermissionSettings() }
         )
     } else {
-        SettingRow(title = "Check for updates", value = "", onClick = updater::checkNow)
+        SettingRow(title = "检查更新", value = "", onClick = updater::checkNow)
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         SettingRow(
-            title = "Allow HomeFlix to install updates",
-            value = if (canInstall) "Allowed" else "Not allowed",
+            title = "允许安装更新",
+            value = if (canInstall) "已允许" else "未允许",
             subtitle = "Needed once. If this doesn't open it: Settings → Apps → Security & restrictions → Unknown sources → HomeFlix.",
             onClick = updater::openInstallPermissionSettings
         )
@@ -261,11 +261,11 @@ private fun SettingRow(title: String, value: String, onClick: () -> Unit, modifi
 @Composable
 private fun NameField(name: String, onSave: (String) -> Unit) {
     var editing by remember { mutableStateOf(false) }
-    SettingRow(title = "Cast name", value = name, subtitle = "Shown in the web app's cast menu", onClick = { editing = true })
+    SettingRow(title = "投屏名称", value = name, subtitle = "显示在网页投屏列表中", onClick = { editing = true })
     if (editing) {
         EditTextDialog(
-            title = "Cast name",
-            hint = "The name this TV shows in the HomeFlix web app",
+            title = "投屏名称",
+            hint = "这台电视在网页端显示的名称",
             initial = name,
             uri = false,
             onSave = { if (it.isNotBlank()) onSave(it.trim()); editing = false },
@@ -327,8 +327,8 @@ private fun EditTextDialog(title: String, hint: String, initial: String, uri: Bo
                         .padding(horizontal = 20.dp, vertical = 15.dp)
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.padding(top = 8.dp)) {
-                    com.homeflix.tv.presentation.ui.PillButton("Save", { onSave(text.text) }, focusRequester = save)
-                    com.homeflix.tv.presentation.ui.PillButton("Cancel", onCancel)
+                    com.homeflix.tv.presentation.ui.PillButton("保存", { onSave(text.text) }, focusRequester = save)
+                    com.homeflix.tv.presentation.ui.PillButton("取消", onCancel)
                 }
             }
         }

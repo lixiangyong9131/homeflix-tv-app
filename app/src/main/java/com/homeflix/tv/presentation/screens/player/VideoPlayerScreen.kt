@@ -107,7 +107,7 @@ private enum class Panel { NONE, TRACKS, SPEED }
  * any other key shows the controls. Controls shown: the timeline has focus
  * (◀ ▶ scrub, OK play/pause), ▲ reaches Back/Restart and the pause actions,
  * ▼ reaches Audio & Subtitles / Speed / Next Episode.
- * Paused for a while → "You're watching" pause screen.
+ * Paused for a while → "正在观看" pause screen.
  */
 @UnstableApi
 @Composable
@@ -413,9 +413,9 @@ private fun ControlsOverlay(
             verticalAlignment = Alignment.Top,
             modifier = Modifier.fillMaxWidth().padding(start = 40.dp, end = 48.dp, top = 28.dp)
         ) {
-            RoundIconButton(Icons.AutoMirrored.Filled.ArrowBack, "Back", onBack)
+            RoundIconButton(Icons.AutoMirrored.Filled.ArrowBack, "返回", onBack)
             Spacer(Modifier.width(14.dp))
-            RoundIconButton(Icons.Filled.Replay, "Restart", onRestart)
+            RoundIconButton(Icons.Filled.Replay, "重新播放", onRestart)
             Spacer(Modifier.weight(1f))
             Column(horizontalAlignment = Alignment.End) {
                 Text(ui.title, color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold, maxLines = 1)
@@ -440,13 +440,13 @@ private fun ControlsOverlay(
                         modifier = Modifier.padding(top = 10.dp))
                 }
                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(top = 20.dp)) {
-                    PillButton("Play from beginning", onRestart, icon = Icons.Filled.Replay, compact = true)
+                    PillButton("从头播放", onRestart, icon = Icons.Filled.Replay, compact = true)
                     ui.inMyList?.let { inList ->
-                        PillButton(if (inList) "In My List" else "My List", onMyList,
+                        PillButton(if (inList) "已收藏" else "我的片单", onMyList,
                             icon = if (inList) Icons.Filled.Check else Icons.Filled.Add, compact = true)
                     }
                 }
-                Text("Paused", color = Tv.TextSecondary, fontSize = 15.sp, modifier = Modifier.padding(top = 14.dp))
+                Text("已暂停", color = Tv.TextSecondary, fontSize = 15.sp, modifier = Modifier.padding(top = 14.dp))
             }
         }
 
@@ -458,8 +458,8 @@ private fun ControlsOverlay(
                 modifier = Modifier.fillMaxWidth().padding(top = 18.dp)
             ) {
                 Chip(Icons.Filled.Subtitles, ui.textSummary, onTracks, onInteract)
-                Chip(Icons.Filled.Speed, if (ui.speed == 1f) "Speed" else "Speed (${speedLabel(ui.speed)})", onSpeed, onInteract)
-                if (ui.nextEpisode != null) Chip(Icons.Filled.SkipNext, "Next Episode", onNext, onInteract)
+                Chip(Icons.Filled.Speed, if (ui.speed == 1f) "倍速" else "Speed (${speedLabel(ui.speed)})", onSpeed, onInteract)
+                if (ui.nextEpisode != null) Chip(Icons.Filled.SkipNext, "下一集", onNext, onInteract)
             }
         }
     }
@@ -597,7 +597,7 @@ private fun speedLabel(s: Float) = if (s % 1f == 0f) "${s.toInt()}x" else "${s}x
 private fun PauseScreen(ui: PlayerUiState) {
     Box(Modifier.fillMaxSize().background(Brush.horizontalGradient(0f to Color(0xEB000000), 0.7f to Color(0x99000000), 1f to Color(0x66000000)))) {
         Column(Modifier.align(Alignment.CenterStart).padding(start = 72.dp).widthIn(max = 560.dp)) {
-            Text("You're watching", color = Tv.TextSecondary, fontSize = 18.sp)
+            Text("正在观看", color = Tv.TextSecondary, fontSize = 18.sp)
             TitleLogo(
                 logoUrl = ui.logoUrl,
                 title = ui.title,
@@ -617,7 +617,7 @@ private fun PauseScreen(ui: PlayerUiState) {
                     overflow = TextOverflow.Ellipsis, modifier = Modifier.padding(top = 12.dp))
             }
         }
-        Text("Paused", color = Tv.TextSecondary, fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
+        Text("已暂停", color = Tv.TextSecondary, fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
             modifier = Modifier.align(Alignment.BottomEnd).padding(48.dp))
     }
 }
@@ -644,7 +644,7 @@ private fun NextEpisodeCard(ui: PlayerUiState, player: Player, visible: Boolean,
                     Text(it, color = Color.White, fontSize = 16.sp, fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(bottom = 10.dp))
                 }
-                PillButton("Next Episode", { onPlayNext(next.id) }, icon = Icons.Filled.SkipNext, focusRequester = focus)
+                PillButton("下一集", { onPlayNext(next.id) }, icon = Icons.Filled.SkipNext, focusRequester = focus)
             }
         }
     }
@@ -664,9 +664,9 @@ private fun TracksPanel(ui: PlayerUiState, onAudio: (TrackOption) -> Unit, onTex
             .padding(start = 72.dp, top = 64.dp, end = 40.dp)
     ) {
         Column(Modifier.weight(1f)) {
-            Text("Audio", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("音轨", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
             LazyColumn(Modifier.padding(top = 14.dp)) {
-                if (ui.audioTracks.isEmpty()) item { OptionRow("Default", true, {}, Modifier.focusRequester(first)) }
+                if (ui.audioTracks.isEmpty()) item { OptionRow("默认", true, {}, Modifier.focusRequester(first)) }
                 items(ui.audioTracks, key = { it.id }) { t ->
                     OptionRow(t.label, t.selected, { onAudio(t) },
                         if (t == ui.audioTracks.first()) Modifier.focusRequester(first) else Modifier)
@@ -675,9 +675,9 @@ private fun TracksPanel(ui: PlayerUiState, onAudio: (TrackOption) -> Unit, onTex
         }
         Spacer(Modifier.width(24.dp))
         Column(Modifier.weight(1f)) {
-            Text("Subtitles", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+            Text("字幕", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
             LazyColumn(Modifier.padding(top = 14.dp)) {
-                item { OptionRow("Off", ui.textTracks.none { it.selected }, { onText(null) }) }
+                item { OptionRow("关闭", ui.textTracks.none { it.selected }, { onText(null) }) }
                 items(ui.textTracks, key = { it.id }) { t -> OptionRow(t.label, t.selected, { onText(t) }) }
             }
         }
@@ -696,7 +696,7 @@ private fun SpeedPanel(current: Float, onSelect: (Float) -> Unit) {
             .background(Brush.horizontalGradient(0f to Color(0xCC000000), 0.25f to Color(0xF2141414)))
             .padding(start = 64.dp, top = 64.dp, end = 32.dp)
     ) {
-        Text("Playback Speed", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+        Text("播放速度", color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(14.dp))
         speeds.forEach { s ->
             OptionRow(if (s == 1f) "1x (Normal)" else speedLabel(s), s == current, { onSelect(s) },
@@ -759,8 +759,8 @@ private fun ErrorCurtain(message: String, onRetry: () -> Unit, onBack: () -> Uni
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(message, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.SemiBold)
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp), modifier = Modifier.padding(top = 24.dp)) {
-                PillButton("Try Again", onRetry, icon = Icons.Filled.Replay, focusRequester = focus)
-                PillButton("Back", onBack, icon = Icons.AutoMirrored.Filled.ArrowBack)
+                PillButton("重试", onRetry, icon = Icons.Filled.Replay, focusRequester = focus)
+                PillButton("返回", onBack, icon = Icons.AutoMirrored.Filled.ArrowBack)
             }
         }
     }

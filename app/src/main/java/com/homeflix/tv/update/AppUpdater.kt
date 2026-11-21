@@ -252,7 +252,7 @@ class AppUpdater @Inject constructor(
 
     // ------------------------------------------------------------------ install
 
-    /** True when Android will let HomeFlix install its update (the "Install unknown apps" switch). */
+    /** True when Android will let HomeFlix install its update (the "安装未知应用" switch). */
     fun canInstall(): Boolean =
         Build.VERSION.SDK_INT < Build.VERSION_CODES.O || context.packageManager.canRequestPackageInstalls()
 

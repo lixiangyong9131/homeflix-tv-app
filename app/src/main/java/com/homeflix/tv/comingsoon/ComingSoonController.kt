@@ -37,7 +37,7 @@ data class ComingSoonState(
     val noTrailer: Boolean = false,
     val overlayVisible: Boolean = true,
     val zone: CsZone = CsZone.NOTIFY,
-    /** "Details" expanded: the full overview and cast. */
+    /** "详情" expanded: the full overview and cast. */
     val details: Boolean = false,
     val paused: Boolean = false,
     val message: String? = null

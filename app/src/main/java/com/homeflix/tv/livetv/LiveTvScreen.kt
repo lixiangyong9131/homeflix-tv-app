@@ -207,7 +207,7 @@ private fun TuningScreen(channel: LiveChannel?, loading: Boolean) {
     Box(Modifier.fillMaxSize().background(Color.Black).testTag("live_tuning"), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(18.dp)) {
             if (channel != null) LogoTile(channel, 180.dp, 100.dp)
-            else if (!loading) Text("Live TV", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+            else if (!loading) Text("直播电视", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
             CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(22.dp))
         }
     }
@@ -328,7 +328,7 @@ private fun FullGuide(state: LiveState) {
     Box(Modifier.fillMaxSize().testTag("live_guide")) {
         Row(Modifier.fillMaxSize().padding(start = Safe, top = 36.dp)) {
             Column(Modifier.width(260.dp)) {
-                Text("Live TV", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 14.dp))
+                Text("直播电视", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 14.dp))
                 LazyColumn(state = groupList, verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     itemsIndexed(state.groups, key = { _, g -> g.id }) { i, g ->
                         val selected = i == state.groupIndex

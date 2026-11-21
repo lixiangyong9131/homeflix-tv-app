@@ -5,7 +5,7 @@ import com.homeflix.tv.presentation.ui.TileKind
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** The "Live TV" row on Home: the Live TV entry, then favorites, then recently watched channels. */
+/** The "直播电视" row on Home: the Live TV entry, then favorites, then recently watched channels. */
 @Singleton
 class LiveTvHome @Inject constructor(private val repo: LiveTvRepository, private val store: LiveTvStore) {
 
@@ -23,7 +23,7 @@ class LiveTvHome @Inject constructor(private val repo: LiveTvRepository, private
         fun build(channels: List<LiveChannel>, favorites: Set<String>, recents: List<String>, last: String?): List<Tile> {
             val byId = channels.associateBy { it.id }
             val lastName = last?.let { byId[it] }?.let { "${it.number}  ${it.name}" }
-            val entry = Tile(key = "live-entry", kind = TileKind.CHANNEL, id = 0, title = "Live TV",
+            val entry = Tile(key = "live-entry", kind = TileKind.CHANNEL, id = 0, title = "直播电视",
                 posterUrl = "", backdropUrl = "", subtitle = lastName ?: "${channels.size} channels",
                 meta = "Live TV  •  ${channels.size} channels", description = "Pick up where you left off, or press ◀ for the guide.")
             val picked = LinkedHashMap<String, LiveChannel>()

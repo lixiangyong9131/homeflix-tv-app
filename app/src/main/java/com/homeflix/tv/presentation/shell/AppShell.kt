@@ -74,7 +74,7 @@ import com.homeflix.tv.presentation.ui.TileActions
 import com.homeflix.tv.presentation.ui.Tv
 import kotlinx.coroutines.delay
 
-enum class ShellTab(val label: String) { SEARCH("Search"), HOME("Home"), SHOWS("Shows"), MOVIES("Movies"), MINE("My HomeFlix") }
+enum class ShellTab(val label: String) { SEARCH("搜索"), HOME("首页"), SHOWS("剧集"), MOVIES("电影"), MINE("我的影视") }
 
 /** Shared state between the top nav and the tab pages. */
 @Stable
@@ -256,13 +256,13 @@ private fun TopNav(
                     )
                 }
                 // Coming Soon opens full screen on OK (it isn't a browse page, so resting on it does nothing).
-                if (onComingSoon != null) NavLiveTv(label = "Coming Soon", canFocus = visible, down = shell.pageEntry, onClick = onComingSoon)
+                if (onComingSoon != null) NavLiveTv(label = "即将上线", canFocus = visible, down = shell.pageEntry, onClick = onComingSoon)
             }
             Spacer(Modifier.weight(1f))
             // Notifications stay on the nav: bell with a red dot while anything is unread.
             NavBell(unread = unread, canFocus = visible, onClick = onNotifications)
             Spacer(Modifier.width(10.dp))
-            NavIconButton(Icons.Filled.Person, "Profile", canFocus = visible, onClick = onToggleMenu)
+            NavIconButton(Icons.Filled.Person, "个人中心", canFocus = visible, onClick = onToggleMenu)
         }
     }
 }
@@ -306,7 +306,7 @@ internal fun NavItem(
             .padding(horizontal = 12.dp, vertical = 5.dp)
     ) {
         if (tab == ShellTab.SEARCH) {
-            Icon(Icons.Filled.Search, contentDescription = "Search", tint = fg, modifier = Modifier.size(18.dp))
+            Icon(Icons.Filled.Search, contentDescription = "搜索", tint = fg, modifier = Modifier.size(18.dp))
         } else {
             Text(tab.label, color = fg, fontSize = 14.sp, fontWeight = if (selected || focused) FontWeight.SemiBold else FontWeight.Normal)
         }
@@ -348,7 +348,7 @@ internal fun NavBell(unread: Int, canFocus: Boolean, onClick: () -> Unit) {
             .background(if (focused) Color.White else Color.Transparent)
             .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClick)
     ) {
-        Icon(Icons.Filled.Notifications, contentDescription = "Notifications",
+        Icon(Icons.Filled.Notifications, contentDescription = "通知",
             tint = if (focused) Color.Black else Color.White, modifier = Modifier.size(19.dp))
         if (unread > 0) {
             Box(
@@ -396,12 +396,12 @@ internal fun ProfileMenu(onDismiss: () -> Unit, onNotifications: () -> Unit, onS
                 .background(Tv.Surface)
                 .padding(vertical = 8.dp)
         ) {
-            MenuItem(Icons.Filled.Notifications, "Notifications", onNotifications, Modifier.focusRequester(first))
-            MenuItem(Icons.Filled.Settings, "Settings", onSettings)
-            if (onLiveTv != null) MenuItem(Icons.Filled.Tv, "Live TV", onLiveTv)
+            MenuItem(Icons.Filled.Notifications, "通知", onNotifications, Modifier.focusRequester(first))
+            MenuItem(Icons.Filled.Settings, "设置", onSettings)
+            if (onLiveTv != null) MenuItem(Icons.Filled.Tv, "直播电视", onLiveTv)
             MenuItem(Icons.Filled.Info, "About HomeFlix", onAbout)
-            MenuItem(Icons.Filled.Refresh, "Refresh", onRefresh)
-            MenuItem(Icons.AutoMirrored.Filled.ExitToApp, "Exit HomeFlix", onExit)
+            MenuItem(Icons.Filled.Refresh, "刷新", onRefresh)
+            MenuItem(Icons.AutoMirrored.Filled.ExitToApp, "退出", onExit)
         }
     }
 }

@@ -35,15 +35,15 @@ val HomeFlixMark: ImageVector by lazy {
     }.build()
 }
 
-/** "▶ HomeFlix": mark + wordmark, white ("Home" heavy, "Flix" light), as on the web app. */
+/** "▶ HomeFlix": mark + wordmark, white ("首页" heavy, "Flix" light), as on the web app. */
 @Composable
 fun BrandWordmark(modifier: Modifier = Modifier, fontSize: TextUnit = 19.sp, markSize: Dp = 15.dp) {
     Row(modifier, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(markSize * 0.45f)) {
         Icon(HomeFlixMark, contentDescription = null, tint = Color.White, modifier = Modifier.size(markSize * 0.89f, markSize))
         Text(
             buildAnnotatedString {
-                withStyle(SpanStyle(fontWeight = FontWeight.ExtraBold, color = Color.White)) { append("Home") }
-                withStyle(SpanStyle(fontWeight = FontWeight.Light, color = Color.White.copy(alpha = 0.8f))) { append("Flix") }
+                withStyle(SpanStyle(fontWeight = FontWeight.ExtraBold, color = Color.White)) { append("影") }
+                withStyle(SpanStyle(fontWeight = FontWeight.Light, color = Color.White.copy(alpha = 0.8f))) { append("视") }
             },
             fontSize = fontSize,
             letterSpacing = (-0.03).em

@@ -64,7 +64,7 @@ class TvSeriesDetailsViewModel @Inject constructor(
             val resumeD = async { findResume(seriesId) }
             val series = seriesD.await()
             if (series == null) {
-                _state.value = SeriesState(loading = false, error = "Couldn't load this show.")
+                _state.value = SeriesState(loading = false, error = "无法加载该剧集")
                 return@launch
             }
             val seasons = seasonsD.await().sortedBy { it.seasonNumber }.filter { it.seasonNumber > 0 }.ifEmpty { seasonsD.await() }
