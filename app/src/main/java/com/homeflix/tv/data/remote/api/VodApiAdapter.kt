@@ -59,7 +59,9 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
     private fun doubanDto(s: JsonObject): MediaDto? {
         val dbId = opt(s, "id").ifBlank { return null }
         val title = opt(s, "title").ifBlank { return null }
-        val cover = opt(s, "cover")
+        // Douban returns the small s_ratio_poster thumbnail by default;
+        // l_ratio_poster is ~12x larger and much sharper on a TV screen.
+        val cover = opt(s, "cover").replace("s_ratio_poster", "l_ratio_poster")
         val rate = runCatching { opt(s, "rate").toDouble() }.getOrDefault(0.0)
         val key = dbId.hashCode()
         val dto = MediaDto(
@@ -118,6 +120,29 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
     private fun vodJson(url: String): JsonObject? =
         json(url, mapOf("User-Agent" to "Mozilla/5.0"))
 
+    /** Pick a direct playable URL from CMS V10 multi-source fields. */
+    private fun pickPlayUrl(v: JsonObject): String {
+        val groups = opt(v, "vod_play_url").split("$$$")
+        val names = opt(v, "vod_play_from").split("$$$")
+        val candidates = mutableListOf<String>()
+        for ((i, group) in groups.withIndex()) {
+            val label = names.getOrNull(i) ?: ""
+            // skip non-direct groups (share pages / iframe players)
+            if (label.contains("share", true) || label.equals("feifan", true)) continue
+            // group format: 第1集$url#第2集$url  (or url directly)
+            for (ep in group.split("#")) {
+                val idx = ep.lastIndexOf('$')
+                val u = (if (idx >= 0 && idx < ep.length - 1) ep.substring(idx + 1) else ep).trim()
+                if (u.startsWith("http")) {
+                    // prefer a real m3u8/mp4 link over a redirect/share page
+                    if (u.contains(".m3u8", true) || u.contains(".mp4", true)) return u
+                    candidates.add(u)
+                }
+            }
+        }
+        return candidates.firstOrNull().orEmpty()
+    }
+
     @Synchronized
     private fun resolvePlayUrl(id: Int): String {
         playCache[id]?.let { return it }
@@ -125,7 +150,6 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
         val q = normalizeTitle(title)
         val search = vodJson("$VOD_API?ac=vod&wd=" + URLEncoder.encode(q, "UTF-8"))
         val rows = search?.getAsJsonArray("list") ?: run {
-            // fallback: drop trailing numbered part
             val short = q.replace(Regex("\\d+$"), "").trim()
             vodJson("$VOD_API?ac=vod&wd=" + URLEncoder.encode(short, "UTF-8"))?.getAsJsonArray("list")
         } ?: return ""
@@ -136,11 +160,7 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
         val vid = opt(cand, "vod_id")
         val detail = vodJson("$VOD_API?ac=detail&ids=" + URLEncoder.encode(vid, "UTF-8"))
         val v = (detail?.getAsJsonArray("list")?.firstOrNull()?.asJsonObject ?: cand)
-        val raw = opt(v, "vod_play_url")
-        val url = raw.split("#").firstOrNull()?.let { seg ->
-            val idx = seg.lastIndexOf('$')
-            if (idx >= 0 && idx < seg.length - 1) seg.substring(idx + 1) else seg
-        }?.trim() ?: ""
+        val url = pickPlayUrl(v)
         playCache[id] = url
         return url
     }
