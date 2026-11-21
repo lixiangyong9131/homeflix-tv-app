@@ -23,7 +23,10 @@ import javax.net.ssl.HttpsURLConnection
 class VodApiAdapter(private val context: Context) : HomeFlixApiService {
 
     companion object {
+        // Slow but complete (list carries poster/description) — used for the home feed.
         private const val API = "https://taopianapi.com/cjapi/mc/vod/json.html"
+        // Fast (~0.5s) — used for search. Detail lookup also fast.
+        private const val FAST_API = "http://ffzy5.tv/api.php/provide/vod"
         private const val PREFS = "vod_adapter_state"
         private const val KEY_LIST = "mylist"
         private const val KEY_PROGRESS = "progress"
@@ -32,6 +35,8 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
 
     private val prefs: SharedPreferences = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
     private val cache = mutableMapOf<Int, MediaDto>()
+    // id -> base url it came from, so playback/detail hits the right source
+    private val sourceOf = mutableMapOf<Int, String>()
     private var allCache: List<MediaDto>? = null
 
     // ---------- low level HTTP ----------
@@ -62,7 +67,7 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
     }
 
     // ---------- Vod -> MediaDto ----------
-    private fun toDto(v: JsonObject): MediaDto? {
+    private fun toDto(v: JsonObject, source: String = API): MediaDto? {
         val id = runCatching { v.get("vod_id").asInt }.getOrNull() ?: return null
         val name = v.optString("vod_name").ifBlank { return null }
         val typeName = v.optString("type_name")
@@ -102,8 +107,13 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
             viewCount = id,
             createdAt = v.optString("vod_time").ifBlank { null }
         )
-        cache[id] = dto
-        return dto
+        // Avoid id collisions between the two sources: shift fast-source ids
+        // into a high range so a search result never overwrites a feed item.
+        val key = if (source == FAST_API) id + 5_000_000 else id
+        val finalDto = if (key == id) dto else dto.copy(id = key, uuid = "fast$id")
+        cache[key] = finalDto
+        sourceOf[key] = source
+        return finalDto
     }
 
     private fun JsonObject.optString(key: String): String =
@@ -112,13 +122,19 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
     @Synchronized
     private fun loadAll(force: Boolean = false): List<MediaDto> {
         allCache?.let { if (!force && it.isNotEmpty()) return it }
+        // The list endpoint is slow (~10s) and returns only 8 fields (no poster,
+        // no play url). Fetch page 1, then one batched detail call to get full
+        // records with posters and play urls — so playback is instant (cache hit).
+        val list = vodList("$API?ac=list")
         val out = mutableListOf<MediaDto>()
-        // Only fetch a couple of pages. The feed triggers many concurrent
-        // loaders; the first one fills the cache and the rest reuse it.
-        for (pg in 1..2) {
-            val list = vodList("$API?ac=list&pg=$pg")
-            if (list.isEmpty()) break
-            list.forEach { toDto(it)?.let { d -> out.add(d) } }
+        if (list.isNotEmpty()) {
+            val ids = list.mapNotNull { runCatching { it.get("vod_id").asString }.getOrNull() }
+            val details = if (ids.isNotEmpty()) vodList("$API?ac=detail&ids=" + ids.joinToString(",")) else emptyList()
+            val detailMap = details.associateBy { runCatching { it.get("vod_id").asString }.getOrNull() }
+            for (v in list) {
+                val vid = runCatching { v.get("vod_id").asString }.getOrNull()
+                toDto(detailMap[vid] ?: v)?.let { out.add(it) }
+            }
         }
         allCache = out
         return out
@@ -127,10 +143,12 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
     private fun findById(id: String): MediaDto? {
         val iid = id.toIntOrNull() ?: return null
         cache[iid]?.let { return it }
-        val root = json("$API?ac=detail&ids=$iid") ?: return null
+        val base = sourceOf[iid] ?: API
+        val realId = if (base == FAST_API && iid >= 5_000_000) iid - 5_000_000 else iid
+        val root = json("$base?ac=detail&ids=$realId") ?: return null
         val arr = root.getAsJsonArray("list") ?: return null
         val v = arr.firstOrNull()?.asJsonObject ?: return null
-        return toDto(v)
+        return toDto(v, base)
     }
 
     // ---------- persisted lightweight state ----------
@@ -171,8 +189,18 @@ class VodApiAdapter(private val context: Context) : HomeFlixApiService {
     override suspend fun searchMedia(query: String, limit: Int, offset: Int): Response<List<MediaDto>> = withContext(Dispatchers.IO) {
         val q = query.trim()
         if (q.isBlank()) return@withContext Response.success(emptyList<MediaDto>())
-        val v = vodList("$API?ac=vod&wd=" + URLEncoder.encode(q, "UTF-8"))
-        Response.success(v.mapNotNull { toDto(it) }.take(limit))
+        // Search via the fast source (~0.5s). Its search rows lack poster/play
+        // url, so fetch detail for a bounded number of results (also fast).
+        val rows = vodList("$FAST_API?ac=vod&wd=" + URLEncoder.encode(q, "UTF-8"))
+        val out = mutableListOf<MediaDto>()
+        for (v in rows.take(12)) {
+            val realId = v.optString("vod_id")
+            val detail = json("$FAST_API?ac=detail&ids=" + URLEncoder.encode(realId, "UTF-8"))
+            val item = (detail?.getAsJsonArray("list")?.firstOrNull()?.asJsonObject ?: v)
+            toDto(item, FAST_API)?.let { out.add(it) }
+            if (out.size >= limit) break
+        }
+        Response.success(out)
     }
 
     override suspend fun getStreamUrl(id: String): Response<StreamInfoDto> = withContext(Dispatchers.IO) {
