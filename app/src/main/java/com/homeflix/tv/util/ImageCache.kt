@@ -39,6 +39,16 @@ object ImageCache {
             }
             .okHttpClient {
                 Http.images().newBuilder()
+                    // Douban CDN returns HTTP 418 without the referer header.
+                    .addInterceptor { chain ->
+                        val req = chain.request()
+                        if (req.url.host.contains("doubanio.com")) {
+                            chain.proceed(req.newBuilder()
+                                .header("Referer", "https://movie.douban.com/")
+                                .header("User-Agent", "Mozilla/5.0")
+                                .build())
+                        } else chain.proceed(req)
+                    }
                     .connectTimeout(8, TimeUnit.SECONDS)
                     .readTimeout(15, TimeUnit.SECONDS)
                     .writeTimeout(30, TimeUnit.SECONDS)
