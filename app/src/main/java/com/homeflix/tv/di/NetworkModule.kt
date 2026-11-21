@@ -75,7 +75,9 @@ object NetworkModule {
     
     @Provides
     @Singleton
-    fun provideHomeFlixApiService(retrofit: Retrofit): HomeFlixApiService {
-        return retrofit.create(HomeFlixApiService::class.java)
+    fun provideHomeFlixApiService(@ApplicationContext context: Context): HomeFlixApiService {
+        // Use the VOD source adapter (CMS V10 / TVBox type:1) instead of the
+        // HomeFlix server. All repositories, ViewModels and Compose UI stay untouched.
+        return com.homeflix.tv.data.remote.api.VodApiAdapter(context)
     }
 }
